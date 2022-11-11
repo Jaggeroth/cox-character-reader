@@ -1,12 +1,18 @@
 package coxCharacterReader;
 
 import java.io.BufferedReader;
+import java.io.BufferedWriter;
+import java.io.File;
+import java.io.FileWriter;
 import java.io.IOException;
 import java.io.Reader;
 import java.io.StringReader;
 import java.net.URISyntaxException;
 import java.util.ArrayList;
+import java.util.Collections;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -61,8 +67,9 @@ public class TestAuthentication {
 		entity1 = response.getEntity();
 		content = EntityUtils.toString(entity1);
 		List<String> charIds = getCharacterIds(content);
-		System.out.println("\"Character\",\"BackAlleyBrawlerGloves\",\"HamidonCostume\",\"LordRecluseMask\",\"StatesmanMask\"," +
-				"\"AncientArtifact\",\"SpellScroll\"");
+		Map<String, Map> matrix = new HashMap<String, Map>();
+		List<String> salvageTypes = new ArrayList<String>();
+		List<String> characters = new ArrayList<String>();
 		for(String charid : charIds) {
 			String apiUrl = CHAR_PAGE_URL + charid;
 			client = HttpClientBuilder.create().build();
@@ -73,8 +80,38 @@ public class TestAuthentication {
 
 			HttpEntity entity = response.getEntity();
 			String charContent = EntityUtils.toString(entity);
-			System.out.println(parseChar(charContent));
+			//System.out.println(parseChar(charContent));
+			String name = parseCharName(charContent);
+			Map<String, String> salvage = parseSalvage(charContent);
+			for (String k :salvage.keySet()) {
+				if (!salvageTypes.contains(k)) {
+					salvageTypes.add(k);
+				}
+			}
+			matrix.put(name, salvage);
+			characters.add(name);
 		}
+		Collections.sort(salvageTypes);
+		Collections.sort(characters);
+		File file = new File("c:/data/rebirth.csv");
+		BufferedWriter writer = new BufferedWriter(new FileWriter(file,true));
+		writer.write("Character," + String.join(",", salvageTypes)+"\n");
+		for (String c : characters) {
+			System.out.println(c);
+			writer.write(String.format("\"%s\"", c));
+			Map<String, String> salvage = matrix.get(c);
+			for (String s : salvageTypes) {
+				if (salvage.containsKey(s)) {
+					writer.write(String.format(",%s", salvage.get(s)));
+				} else {
+					writer.write(",0");
+				}
+			}
+			writer.write("\n");
+		}
+		writer.write("\n");
+		writer.close();
+		System.out.println("END");
 	}
 
 	private static String loginAttempt(String url, List<NameValuePair> parms, HttpContext localContext) throws IOException {
@@ -121,6 +158,16 @@ public class TestAuthentication {
 		return parms;
 	}
 
+	private static String parseCharName(String content) {
+		final String regex = "^Name \\\"(.+)\\\"";
+        final Pattern pattern = Pattern.compile(regex, Pattern.MULTILINE);
+        final Matcher matcher = pattern.matcher(content);
+        if (matcher.find()) {
+        	return matcher.group(1);
+        }
+		return null;
+	}
+
 	private static String extractValue(String line) {
 		String regex = "value=\\\"(.+)\\\"";
         final Pattern pattern = Pattern.compile(regex, Pattern.MULTILINE);
@@ -141,6 +188,18 @@ public class TestAuthentication {
         }
         return ids;
 	}
+
+	private static Map<String, String> parseSalvage(String content) {
+		Map<String, String> salvage = new HashMap<String, String>();
+        final String regex = "InvSalvage0\\[0].S_(\\S+)\\s(\\S)";
+        final Pattern pattern = Pattern.compile(regex, Pattern.MULTILINE);
+        final Matcher matcher = pattern.matcher(content);
+        while (matcher.find()) {
+        	salvage.put(matcher.group(1), matcher.group(2));
+        }
+		return salvage;
+	}
+
 	private static String parseChar(String content) {
 		Reader inputString = new StringReader(content);
 		BufferedReader reader = new BufferedReader(inputString);
