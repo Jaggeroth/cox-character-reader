@@ -21,13 +21,12 @@ import org.apache.http.client.ResponseHandler;
 import org.apache.http.client.entity.UrlEncodedFormEntity;
 import org.apache.http.client.methods.HttpGet;
 import org.apache.http.client.methods.HttpPost;
-import org.apache.http.client.protocol.ClientContext;
+import org.apache.http.client.protocol.HttpClientContext;
 import org.apache.http.impl.client.BasicCookieStore;
 import org.apache.http.impl.client.CloseableHttpClient;
 import org.apache.http.impl.client.HttpClientBuilder;
 import org.apache.http.impl.client.HttpClients;
 import org.apache.http.message.BasicNameValuePair;
-import org.apache.http.protocol.BasicHttpContext;
 import org.apache.http.protocol.HttpContext;
 import org.apache.http.util.EntityUtils;
 
@@ -40,8 +39,8 @@ public class TestAuthentication {
 		if (args.length <2)
 			throw new IllegalArgumentException("2 parameters expected, Username and password");
         CookieStore cookieStore = new BasicCookieStore();
-        HttpContext localContext = new BasicHttpContext();
-        localContext.setAttribute(ClientContext.COOKIE_STORE, cookieStore);
+        HttpClientContext  localContext = HttpClientContext.create();
+        localContext.setCookieStore(cookieStore);
         
 		HttpClient client = HttpClientBuilder.create().build();
 		HttpGet request = new HttpGet(LOGIN_URL);
@@ -117,7 +116,6 @@ public class TestAuthentication {
 				line = reader.readLine();
 			}
 		} catch (IOException e) {
-			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
 		return parms;
@@ -176,7 +174,6 @@ public class TestAuthentication {
 			}
 			reader.close();
 		} catch (IOException e) {
-			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
 		return String.format("%s,%s,%s,%s,%s,%s,%s", 
