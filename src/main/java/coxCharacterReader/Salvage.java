@@ -3,6 +3,7 @@ package coxCharacterReader;
 import java.io.BufferedReader;
 import java.io.BufferedWriter;
 import java.io.File;
+import java.io.FileReader;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.io.Reader;
@@ -13,6 +14,7 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Properties;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -36,14 +38,13 @@ import org.apache.http.message.BasicNameValuePair;
 import org.apache.http.protocol.HttpContext;
 import org.apache.http.util.EntityUtils;
 
-public class TestAuthentication {
+public class Salvage {
 	private static final String LOGIN_URL = "https://www.cityofheroesrebirth.com/public/login";
 	private static final String MANAGE_URL = "https://www.cityofheroesrebirth.com/public/manage";
 	private static final String CHAR_PAGE_URL = "https://www.cityofheroesrebirth.com/public/api/character/raw?q=";
 
 	public static void main(String[] args) throws ClientProtocolException, IOException, URISyntaxException {
-		if (args.length <2)
-			throw new IllegalArgumentException("2 parameters expected, Username and password");
+		Properties p = getConfig();
         CookieStore cookieStore = new BasicCookieStore();
         HttpClientContext  localContext = HttpClientContext.create();
         localContext.setCookieStore(cookieStore);
@@ -56,8 +57,8 @@ public class TestAuthentication {
 		String content = EntityUtils.toString(entity1);
 		
 		List<NameValuePair> parms = parseLogin(content, null);
-		parms.add(new BasicNameValuePair("username", args[0]));
-		parms.add(new BasicNameValuePair("password", args[1]));
+		parms.add(new BasicNameValuePair("username", p.getProperty("username")));
+		parms.add(new BasicNameValuePair("password", p.getProperty("password")));
 		parms.add(new BasicNameValuePair("nextpage", "login"));
 		parms.add(new BasicNameValuePair("submit", "login"));
 		loginAttempt(LOGIN_URL, parms,  localContext);
@@ -80,8 +81,8 @@ public class TestAuthentication {
 
 			HttpEntity entity = response.getEntity();
 			String charContent = EntityUtils.toString(entity);
-			//System.out.println(parseChar(charContent));
 			String name = parseCharName(charContent);
+			System.out.println(String.format("Processing %s", name));
 			Map<String, String> salvage = parseSalvage(charContent);
 			for (String k :salvage.keySet()) {
 				if (!salvageTypes.contains(k)) {
@@ -93,11 +94,10 @@ public class TestAuthentication {
 		}
 		Collections.sort(salvageTypes);
 		Collections.sort(characters);
-		File file = new File("c:/data/rebirth.csv");
+		File file = new File(p.getProperty("filename"));
 		BufferedWriter writer = new BufferedWriter(new FileWriter(file,true));
 		writer.write("Character," + String.join(",", salvageTypes)+"\n");
 		for (String c : characters) {
-			System.out.println(c);
 			writer.write(String.format("\"%s\"", c));
 			Map<String, String> salvage = matrix.get(c);
 			for (String s : salvageTypes) {
@@ -191,7 +191,7 @@ public class TestAuthentication {
 
 	private static Map<String, String> parseSalvage(String content) {
 		Map<String, String> salvage = new HashMap<String, String>();
-        final String regex = "InvSalvage0\\[0].S_(\\S+)\\s(\\S)";
+        final String regex = "InvSalvage0\\[0].S_(\\S+)\\s(\\S+)";
         final Pattern pattern = Pattern.compile(regex, Pattern.MULTILINE);
         final Matcher matcher = pattern.matcher(content);
         while (matcher.find()) {
@@ -199,49 +199,15 @@ public class TestAuthentication {
         }
 		return salvage;
 	}
-
-	private static String parseChar(String content) {
-		Reader inputString = new StringReader(content);
-		BufferedReader reader = new BufferedReader(inputString);
-		String name = "";
-		String StatesmanMask = "0";
-		String LordRecluseMask = "0";
-		String BackAlleyBrawlerGloves = "0";
-		String HamidonCostume = "0";
-		String SpellScroll = "0";
-		String AncientArtifact = "0";
-		
-		try {
-			String line = reader.readLine();
-			while (line != null) {
-				if (line.startsWith("Name ")) {
-					name = line.substring(5);
-				} else if (line.startsWith("InvSalvage0[0].S_StatesmanMask_H2006")) {
-					StatesmanMask = line.substring(37);
-				} else if (line.startsWith("InvSalvage0[0].S_LordRecluseMask_H2006")) {
-					LordRecluseMask = line.substring(39);
-				} else if (line.startsWith("InvSalvage0[0].S_BackAlleyBrawlerGloves_H2006")) {
-					BackAlleyBrawlerGloves = line.substring(46);
-				} else if (line.startsWith("InvSalvage0[0].S_HamidonCostume_H2006")) {
-					HamidonCostume = line.substring(38);
-				} else if (line.startsWith("InvSalvage0[0].S_SpellScroll")) {
-					SpellScroll = line.substring(29);
-				} else if (line.startsWith("InvSalvage0[0].S_AncientArtifact")) {
-					AncientArtifact = line.substring(33);
-				}
-				line = reader.readLine();
-			}
-			reader.close();
-		} catch (IOException e) {
-			e.printStackTrace();
+	private static Properties getConfig() throws IOException {
+		FileReader reader = new FileReader("properties.cfg");
+		Properties p = new Properties();
+		p.load(reader);
+		if (p.getProperty("username") != null &&
+				p.getProperty("password") != null &&
+				p.getProperty("filename") != null) {
+			return p;
 		}
-		return String.format("%s,%s,%s,%s,%s,%s,%s", 
-				name, 
-				BackAlleyBrawlerGloves, 
-				HamidonCostume, 
-				LordRecluseMask, 
-				StatesmanMask,
-				AncientArtifact,
-				SpellScroll);
+		throw new IOException("Invalid Config File: Missing Parameters");
 	}
 }
