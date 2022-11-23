@@ -3,12 +3,12 @@
   <modelVersion>4.0.0</modelVersion>
 
   <groupId>rebirth</groupId>
-  <artifactId>cox-character-reader</artifactId>
-  <version>0.0.1-SNAPSHOT</version>
+  <artifactId>cox-salvage-tool</artifactId>
+  <version>0.0.1</version>
   <packaging>jar</packaging>
 
   <name>cox-character-reader</name>
-  <url>http://maven.apache.org</url>
+  <url>https://github.com/Jaggeroth/cox-character-reader</url>
 
   <properties>
     <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
@@ -22,5 +22,58 @@
 		  <artifactId>httpclient</artifactId>
 		  <version>4.5.13</version>
     </dependency>
+    <dependency>
+      <groupId>org.apache.httpcomponents</groupId>
+      <artifactId>httpcore</artifactId>
+      <version>4.4.13</version>
+    </dependency>
+
+    <!-- https://mvnrepository.com/artifact/org.apache.maven.plugins/maven-jar-plugin -->
+    <dependency>
+      <groupId>org.apache.maven.plugins</groupId>
+      <artifactId>maven-jar-plugin</artifactId>
+      <version>3.3.0</version>
+    </dependency>
   </dependencies>
+
+	<build>
+		<plugins>
+      <!-- Copy Dependencies -->
+      <plugin>
+        <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-dependency-plugin</artifactId>
+        <executions>
+          <execution>
+            <id>copy-dependencies</id>
+            <phase>prepare-package</phase>
+            <goals>
+              <goal>copy-dependencies</goal>
+            </goals>
+            <configuration>
+              <outputDirectory>
+                ${project.build.directory}/libs
+              </outputDirectory>
+            </configuration>
+          </execution>
+        </executions>
+      </plugin>
+      <!-- Build an executable JAR -->
+			<plugin>
+				<groupId>org.apache.maven.plugins</groupId>
+				<artifactId>maven-jar-plugin</artifactId>
+				<version>3.3.0</version>
+				<configuration>
+					<archive>
+						<manifest>
+							<addClasspath>true</addClasspath>
+							<classpathPrefix>libs/</classpathPrefix>
+							<mainClass>coxCharacterReader.Salvage</mainClass>
+						</manifest>
+					</archive>
+				</configuration>
+			</plugin>
+		</plugins>
+	</build>
+
+  
 </project>
