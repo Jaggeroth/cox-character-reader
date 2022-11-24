@@ -82,15 +82,19 @@ public class Salvage {
 			HttpEntity entity = response.getEntity();
 			String charContent = EntityUtils.toString(entity);
 			String name = parseCharName(charContent);
-			System.out.println(String.format("Processing %s", name));
-			Map<String, String> salvage = parseSalvage(charContent);
-			for (String k :salvage.keySet()) {
-				if (!salvageTypes.contains(k)) {
-					salvageTypes.add(k);
+			/* Unfortunately the url doesn't always work 
+			 * So skip if the name cannot be parsed */
+			if (name != null ) {
+				System.out.println(String.format("Processing %s", name));
+				Map<String, String> salvage = parseSalvage(charContent);
+				for (String k :salvage.keySet()) {
+					if (!salvageTypes.contains(k)) {
+						salvageTypes.add(k);
+					}
 				}
+				matrix.put(name, salvage);
+				characters.add(name);
 			}
-			matrix.put(name, salvage);
-			characters.add(name);
 		}
 		Collections.sort(salvageTypes);
 		Collections.sort(characters);
