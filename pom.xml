@@ -38,40 +38,31 @@
 
 	<build>
 		<plugins>
-      <!-- Copy Dependencies -->
-      <plugin>
+		  <!-- Maven Assembly Plugin -->
+		  <plugin>
         <groupId>org.apache.maven.plugins</groupId>
-        <artifactId>maven-dependency-plugin</artifactId>
-        <executions>
-          <execution>
-            <id>copy-dependencies</id>
-            <phase>prepare-package</phase>
-            <goals>
-              <goal>copy-dependencies</goal>
-            </goals>
-            <configuration>
-              <outputDirectory>
-                ${project.build.directory}/libs
-              </outputDirectory>
-            </configuration>
-          </execution>
-        </executions>
+	      <artifactId>maven-assembly-plugin</artifactId>
+	      <executions>
+		      <execution>
+			      <phase>package</phase>
+			      <goals>
+				      <goal>single</goal>
+			      </goals>
+			      <configuration>
+				      <archive>
+					    <manifest>
+						    <mainClass>
+						      coxCharacterReader.Salvage
+						    </mainClass>
+					    </manifest>
+				      </archive>
+				      <descriptorRefs>
+					      <descriptorRef>jar-with-dependencies</descriptorRef>
+				      </descriptorRefs>
+			      </configuration>
+		      </execution>
+	      </executions>
       </plugin>
-      <!-- Build an executable JAR -->
-			<plugin>
-				<groupId>org.apache.maven.plugins</groupId>
-				<artifactId>maven-jar-plugin</artifactId>
-				<version>3.3.0</version>
-				<configuration>
-					<archive>
-						<manifest>
-							<addClasspath>true</addClasspath>
-							<classpathPrefix>libs/</classpathPrefix>
-							<mainClass>coxCharacterReader.Salvage</mainClass>
-						</manifest>
-					</archive>
-				</configuration>
-			</plugin>
 		</plugins>
 	</build>
 
