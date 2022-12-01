@@ -45,57 +45,63 @@ public class Salvage {
 
 	public static void main(String[] args) throws ClientProtocolException, IOException, URISyntaxException {
 		Properties p = getConfig();
-        CookieStore cookieStore = new BasicCookieStore();
-        HttpClientContext  localContext = HttpClientContext.create();
-        localContext.setCookieStore(cookieStore);
-        
-		HttpClient client = HttpClientBuilder.create().build();
-		HttpGet request = new HttpGet(LOGIN_URL);
-		request.addHeader("User-Agent", "Apache HTTPClient");
-		HttpResponse response = client.execute(request, localContext);
-		HttpEntity entity1 = response.getEntity();
-		String content = EntityUtils.toString(entity1);
-		
-		List<NameValuePair> parms = parseLogin(content, null);
-		parms.add(new BasicNameValuePair("username", p.getProperty("username")));
-		parms.add(new BasicNameValuePair("password", p.getProperty("password")));
-		parms.add(new BasicNameValuePair("nextpage", "login"));
-		parms.add(new BasicNameValuePair("submit", "login"));
-		loginAttempt(LOGIN_URL, parms,  localContext);
-		request = new HttpGet(MANAGE_URL);
-		request.addHeader("User-Agent", "Apache HTTPClient");
-		response = client.execute(request, localContext);
-		entity1 = response.getEntity();
-		content = EntityUtils.toString(entity1);
-		List<String> charIds = getCharacterIds(content);
-		Map<String, Map> matrix = new HashMap<String, Map>();
+
 		List<String> salvageTypes = new ArrayList<String>();
 		List<String> characters = new ArrayList<String>();
-		for(String charid : charIds) {
-			String apiUrl = CHAR_PAGE_URL + charid;
-			client = HttpClientBuilder.create().build();
-			request = new HttpGet(apiUrl);
-
+		Map<String, Map> matrix = new HashMap<String, Map>();
+		
+		for (RebirthAccount account : getAccounts(p)) {
+			System.out.println(account.getUsername());
+	        CookieStore cookieStore = new BasicCookieStore();
+	        HttpClientContext  localContext = HttpClientContext.create();
+	        localContext.setCookieStore(cookieStore);
+	        
+			HttpClient client = HttpClientBuilder.create().build();
+			HttpGet request = new HttpGet(LOGIN_URL);
 			request.addHeader("User-Agent", "Apache HTTPClient");
-			response = client.execute(request);
+			HttpResponse response = client.execute(request, localContext);
+			HttpEntity entity1 = response.getEntity();
+			String content = EntityUtils.toString(entity1);
+			List<NameValuePair> parms = parseLogin(content, null);
+			parms.add(new BasicNameValuePair("username", account.getUsername()));
+			parms.add(new BasicNameValuePair("password", account.getPassword()));
+			parms.add(new BasicNameValuePair("nextpage", "login"));
+			parms.add(new BasicNameValuePair("submit", "login"));
+			loginAttempt(LOGIN_URL, parms,  localContext);
+			request = new HttpGet(MANAGE_URL);
+			request.addHeader("User-Agent", "Apache HTTPClient");
+			response = client.execute(request, localContext);
+			entity1 = response.getEntity();
+			content = EntityUtils.toString(entity1);
+			List<String> charIds = getCharacterIds(content);
+			for(String charid : charIds) {
+				String apiUrl = CHAR_PAGE_URL + charid;
+				client = HttpClientBuilder.create().build();
+				request = new HttpGet(apiUrl);
 
-			HttpEntity entity = response.getEntity();
-			String charContent = EntityUtils.toString(entity);
-			String name = parseCharName(charContent);
-			/* Unfortunately the url doesn't always work 
-			 * So skip if the name cannot be parsed */
-			if (name != null ) {
-				System.out.println(String.format("Processing %s", name));
-				Map<String, String> salvage = parseSalvage(charContent);
-				for (String k :salvage.keySet()) {
-					if (!salvageTypes.contains(k)) {
-						salvageTypes.add(k);
+				request.addHeader("User-Agent", "Apache HTTPClient");
+				response = client.execute(request);
+
+				HttpEntity entity = response.getEntity();
+				String charContent = EntityUtils.toString(entity);
+				String name = parseCharName(charContent);
+				/* Unfortunately the url doesn't always work 
+				 * So skip if the name cannot be parsed */
+				if (name != null ) {
+					System.out.println(String.format("Processing %s", name));
+					Map<String, String> salvage = parseSalvage(charContent, includeArchive(p));
+					for (String k :salvage.keySet()) {
+						if (!salvageTypes.contains(k)) {
+							salvageTypes.add(k);
+						}
 					}
+					matrix.put(name, salvage);
+					characters.add(name);
 				}
-				matrix.put(name, salvage);
-				characters.add(name);
 			}
+			
 		}
+		
 		Collections.sort(salvageTypes);
 		Collections.sort(characters);
 		File file = new File(p.getProperty("filename"));
@@ -162,6 +168,29 @@ public class Salvage {
 		return parms;
 	}
 
+	private static List<RebirthAccount> getAccounts(Properties p) {
+		List<RebirthAccount> accounts = new ArrayList<>();
+		if (p.getProperty("account.1.username") != null && p.getProperty("account.1.password") != null) {
+			accounts.add(new RebirthAccount(p.getProperty("account.1.username"), p.getProperty("account.1.password")));
+		}
+		if (p.getProperty("account.2.username") != null && p.getProperty("account.2.password") != null) {
+			accounts.add(new RebirthAccount(p.getProperty("account.2.username"), p.getProperty("account.2.password")));
+		}
+		if (p.getProperty("account.3.username") != null && p.getProperty("account.3.password") != null) {
+			accounts.add(new RebirthAccount(p.getProperty("account.3.username"), p.getProperty("account.3.password")));
+		}
+		return accounts;
+	}
+
+	private static boolean includeArchive(Properties p) {
+		if (p.getProperty("include.vault") != null) {
+			if ("true".equalsIgnoreCase(p.getProperty("include.vault"))) {
+				return true;
+			}
+		}
+		return false;
+	}
+
 	private static String parseCharName(String content) {
 		final String regex = "^Name \\\"(.+)\\\"";
         final Pattern pattern = Pattern.compile(regex, Pattern.MULTILINE);
@@ -193,7 +222,7 @@ public class Salvage {
         return ids;
 	}
 
-	private static Map<String, String> parseSalvage(String content) {
+	private static Map<String, String> parseSalvage(String content, boolean incVault) {
 		Map<String, String> salvage = new HashMap<String, String>();
         final String regex = "InvSalvage0\\[0].S_(\\S+)\\s(\\S+)";
         final Pattern pattern = Pattern.compile(regex, Pattern.MULTILINE);
@@ -201,14 +230,29 @@ public class Salvage {
         while (matcher.find()) {
         	salvage.put(matcher.group(1), matcher.group(2));
         }
+        if (incVault) {
+            final String regex2 = "InvStoredSalvage0\\[0].S_(\\S+)\\s(\\S+)";
+        	final Pattern pattern2 = Pattern.compile(regex2, Pattern.MULTILINE);
+        	final Matcher matcher2 = pattern2.matcher(content);
+        	while (matcher2.find()) {
+        		String s = matcher2.group(1);
+        		String v = matcher2.group(2);
+        		if (salvage.containsKey(s)) {
+        			int count = Integer.valueOf(salvage.get(s)) + Integer.valueOf(v);
+        			salvage.put(s, String.valueOf(count));
+        		} else {
+        			salvage.put(s, v);
+        		}
+        	}
+        }
 		return salvage;
 	}
 	private static Properties getConfig() throws IOException {
 		FileReader reader = new FileReader("properties.cfg");
 		Properties p = new Properties();
 		p.load(reader);
-		if (p.getProperty("username") != null &&
-				p.getProperty("password") != null &&
+		if (p.getProperty("account.1.username") != null &&
+				p.getProperty("account.1.password") != null &&
 				p.getProperty("filename") != null) {
 			return p;
 		}

@@ -4,7 +4,7 @@
 
   <groupId>rebirth</groupId>
   <artifactId>cox-salvage-tool</artifactId>
-  <version>0.0.1</version>
+  <version>0.0.3</version>
   <packaging>jar</packaging>
 
   <name>cox-character-reader</name>
