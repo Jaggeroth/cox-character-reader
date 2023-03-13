@@ -15,6 +15,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Properties;
+import java.util.Scanner;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -48,8 +49,9 @@ public class Salvage {
 
 		List<String> salvageTypes = new ArrayList<String>();
 		List<String> characters = new ArrayList<String>();
-		Map<String, Map> matrix = new HashMap<String, Map>();
-		
+		Map<String, Map<String, String>> salvageMatrix = new HashMap<String, Map<String, String>>();
+		Map<String, Map<String, String>> attribsMatrix = new HashMap<String, Map<String, String>>();
+
 		for (RebirthAccount account : getAccounts(p)) {
 			System.out.println(account.getUsername());
 	        CookieStore cookieStore = new BasicCookieStore();
@@ -89,13 +91,15 @@ public class Salvage {
 				 * So skip if the name cannot be parsed */
 				if (name != null ) {
 					System.out.println(String.format("Processing %s", name));
+					Map<String, String> attribs = parseCharacterAttribs(charContent);
 					Map<String, String> salvage = parseSalvage(charContent, includeArchive(p));
 					for (String k :salvage.keySet()) {
 						if (!salvageTypes.contains(k)) {
 							salvageTypes.add(k);
 						}
 					}
-					matrix.put(name, salvage);
+					salvageMatrix.put(name, salvage);
+					attribsMatrix.put(name, attribs);
 					characters.add(name);
 				}
 			}
@@ -106,10 +110,16 @@ public class Salvage {
 		Collections.sort(characters);
 		File file = new File(p.getProperty("filename"));
 		BufferedWriter writer = new BufferedWriter(new FileWriter(file,true));
-		writer.write("Character," + String.join(",", salvageTypes)+"\n");
+		writer.write("Character,Level,Origin,\"Primary Powerset\",\"Secondary Powerset\"," + String.join(",", salvageTypes)+"\n");
 		for (String c : characters) {
-			writer.write(String.format("\"%s\"", c));
-			Map<String, String> salvage = matrix.get(c);
+			Map<String, String> attribs = attribsMatrix.get(c);
+			String lvl = attribs.get("Level") != null ? attribs.get("Level").toString() : "0";
+			String o = attribs.get("Origin") != null ? attribs.get("Origin").toString() : "Unknown";
+			String prime = attribs.get("Primary") != null ? attribs.get("Primary").toString() : "Unknown";
+			String sec = attribs.get("Secondary") != null ? attribs.get("Secondary").toString() : "Unknown";
+			writer.write(String.format("\"%s\",%s,%s,%s,%s", c, lvl, o, prime, sec));
+			//
+			Map<String, String> salvage = salvageMatrix.get(c);
 			for (String s : salvageTypes) {
 				if (salvage.containsKey(s)) {
 					writer.write(String.format(",%s", salvage.get(s)));
@@ -220,6 +230,24 @@ public class Salvage {
         	ids.add(matcher.group(1));
         }
         return ids;
+	}
+	private static Map<String, String> parseCharacterAttribs(String content) {
+		Map<String, String> attribs = new HashMap<String, String>();
+		Scanner scanner = new Scanner(content);
+		while (scanner.hasNextLine()) {
+		  String line = scanner.nextLine();
+		  if (line.startsWith("Origin ")) {
+			  attribs.put("Origin", line.split(" ")[1]);
+		  } else if (line.startsWith("Level ")) {
+			  attribs.put("Level", line.split(" ")[1]);
+		  } else if (line.startsWith("Ents2[0].originalPrimary ")) {
+			  attribs.put("Primary", line.split(" ")[1]);
+		  } else if (line.startsWith("Ents2[0].originalSecondary ")) {
+			  attribs.put("Secondary", line.split(" ")[1]);
+		  }
+		}
+		scanner.close();
+		return attribs;
 	}
 
 	private static Map<String, String> parseSalvage(String content, boolean incVault) {
