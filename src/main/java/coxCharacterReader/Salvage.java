@@ -110,14 +110,15 @@ public class Salvage {
 		Collections.sort(characters);
 		File file = new File(p.getProperty("filename"));
 		BufferedWriter writer = new BufferedWriter(new FileWriter(file,true));
-		writer.write("Character,Level,Origin,\"Primary Powerset\",\"Secondary Powerset\"," + String.join(",", salvageTypes)+"\n");
+		writer.write("Character,Archetype,Level,Origin,\"Primary Powerset\",\"Secondary Powerset\"," + String.join(",", salvageTypes)+"\n");
 		for (String c : characters) {
 			Map<String, String> attribs = attribsMatrix.get(c);
-			String lvl = attribs.get("Level") != null ? attribs.get("Level").toString() : "0";
+			String archetype = attribs.get("Archetype") != null ? attribs.get("Archetype").toString() : "Unknown";
+			String lvl = attribs.get("Level") != null ? attribs.get("Level").toString() : "1";
 			String o = attribs.get("Origin") != null ? attribs.get("Origin").toString() : "Unknown";
 			String prime = attribs.get("Primary") != null ? attribs.get("Primary").toString() : "Unknown";
 			String sec = attribs.get("Secondary") != null ? attribs.get("Secondary").toString() : "Unknown";
-			writer.write(String.format("\"%s\",%s,%s,%s,%s", c, lvl, o, prime, sec));
+			writer.write(String.format("\"%s\",%s,%s,%s,%s,%s", c, archetype, lvl, o, prime, sec));
 			//
 			Map<String, String> salvage = salvageMatrix.get(c);
 			for (String s : salvageTypes) {
@@ -236,10 +237,13 @@ public class Salvage {
 		Scanner scanner = new Scanner(content);
 		while (scanner.hasNextLine()) {
 		  String line = scanner.nextLine();
-		  if (line.startsWith("Origin ")) {
+		  if (line.startsWith("Class ")) {
+			  attribs.put("Archetype", line.split(" ")[1]);
+		  } else if (line.startsWith("Origin ")) {
 			  attribs.put("Origin", line.split(" ")[1]);
 		  } else if (line.startsWith("Level ")) {
-			  attribs.put("Level", line.split(" ")[1]);
+			  int lvl = Integer.valueOf(line.split(" ")[1]) + 1;
+			  attribs.put("Level", String.valueOf(lvl));
 		  } else if (line.startsWith("Ents2[0].originalPrimary ")) {
 			  attribs.put("Primary", line.split(" ")[1]);
 		  } else if (line.startsWith("Ents2[0].originalSecondary ")) {
