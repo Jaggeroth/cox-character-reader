@@ -3,6 +3,7 @@ package coxCharacterReader;
 import java.io.IOException;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Scanner;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -14,8 +15,9 @@ import org.apache.http.impl.client.HttpClientBuilder;
 import org.apache.http.util.EntityUtils;
 
 public class BuildInfo {
-	private static final String CHAR_PAGE_URL = "https://www.cityofheroesrebirth.com/public/api/character/raw?q=<character id here>";
+    private static final String CHAR_PAGE_URL = "https://www.cityofheroesrebirth.com/public/api/character/raw?q=<character id here>";
 
+	public static final int[] BUILD_LEVELS = new int[]{1, 2, 4, 6, 8, 10, 12, 14, 16, 18, 20, 22, 24, 26, 28, 30, 32, 35, 38, 41, 44, 47, 49};
 	public static void main(String[] args) throws IOException {
 		HttpClient client = HttpClientBuilder.create().build();
 		HttpGet request = new HttpGet(CHAR_PAGE_URL);
@@ -23,57 +25,82 @@ public class BuildInfo {
 		HttpResponse response = client.execute(request);
 		HttpEntity entity = response.getEntity();
 		String charContent = EntityUtils.toString(entity);
-		Map<Integer, Power> powers = parsePowers(charContent);
-		Map<Integer, Boost> boosts = parseEnhancements(charContent);
+		Map<Integer, Power> powers = new HashMap<Integer, Power>();
+		powers = parsePowers(charContent);
+		Map<Integer, Boost> boosts  = new HashMap<Integer, Boost>();
+		boosts= parseEnhancements(charContent);
 		System.out.println("BUILD DATA\n==========");
-		System.out.println("INHERENT POWERS\n===============");
+		System.out.println(String.format("NAME: %s", parseCharName(charContent)));
+		Map<String, String> attribs = parseCharacterAttribs(charContent);
+		System.out.println(String.format("ORIGIN: %s", attribs.get("Origin")));
+		System.out.println(String.format("ARCHETYPE: %s", attribs.get("Archetype")));
+		System.out.println(String.format("PRIMARY: %s", attribs.get("Primary")));
+		System.out.println(String.format("SECONDARY: %s", attribs.get("Secondary")));
+		System.out.println(String.format("LEVEL: %s", attribs.get("Level")));
+		Integer characterLevel = Integer.parseInt(attribs.get("Level"));
+		System.out.println("\nINHERENT POWERS\n===============");
 		findInherentPowers(powers, boosts);
-		System.out.println("LEVEL 1\n=======");
-		findPower(1,powers, boosts);
-		System.out.println("LEVEL 2\n=======");
-		findPower(2,powers, boosts);
-		System.out.println("LEVEL 4\n=======");
-		findPower(4,powers, boosts);
-		System.out.println("LEVEL 6\n=======");
-		findPower(6,powers, boosts);
-		System.out.println("LEVEL 8\n=======");
-		findPower(8,powers, boosts);
-		System.out.println("LEVEL 10\n========");
-		findPower(10,powers, boosts);
-		System.out.println("LEVEL 12\n========");
-		findPower(12,powers, boosts);
-		System.out.println("LEVEL 14\n========");
-		findPower(14,powers, boosts);
-		System.out.println("LEVEL 16\n========");
-		findPower(16,powers, boosts);
-		System.out.println("LEVEL 18\n========");
-		findPower(18,powers, boosts);
-		System.out.println("LEVEL 20\n========");
-		findPower(20,powers, boosts);
-		System.out.println("LEVEL 22\n========");
-		findPower(22,powers, boosts);
-		System.out.println("LEVEL 24\n========");
-		findPower(24,powers, boosts);
-		System.out.println("LEVEL 26\n========");
-		findPower(26,powers, boosts);
-		System.out.println("LEVEL 28\n========");
-		findPower(28,powers, boosts);
-		System.out.println("LEVEL 30\n========");
-		findPower(30,powers, boosts);
-		System.out.println("LEVEL 32\n========");
-		findPower(32,powers, boosts);
-		System.out.println("LEVEL 35\n========");
-		findPower(35,powers, boosts);
-		System.out.println("LEVEL 38\n========");
-		findPower(38,powers, boosts);
-		System.out.println("LEVEL 41\n========");
-		findPower(41,powers, boosts);
-		System.out.println("LEVEL 44\n========");
-		findPower(44,powers, boosts);
-		System.out.println("LEVEL 47\n========");
-		findPower(47,powers, boosts);
-		System.out.println("LEVEL 49\n========");
-		findPower(49,powers, boosts);
+		for (int buildLevel : BUILD_LEVELS) {
+			if (buildLevel <= characterLevel) {
+				System.out.println(String.format("\nLEVEL %s", buildLevel));
+				System.out.println(buildLevel<10?"=======":"========");
+				findPower(buildLevel,powers, boosts);
+			}
+		}
+		/***
+		 * Check for and display Incarnate powers
+		 **/
+		if (characterLevel >= 50) {
+			Power alphaSlot = null;
+			Power judgementSlot = null;
+			Power interfaceSlot = null;
+			Power loreSlot = null;
+			Power destinySlot = null;
+			Power hybridSlot = null;
+			boolean hasIncarnate = false;
+			for (Map.Entry<Integer, Power> entry : powers.entrySet()) {
+				Power p = entry.getValue();
+				if (p.isIncarnatePower()) {
+					if (p.getDisabled()==null) {
+						hasIncarnate = true;
+						if ("\"alpha\"".equalsIgnoreCase(p.getPowerSetName())) {
+							alphaSlot = p;
+						} else if ("\"judgement\"".equalsIgnoreCase(p.getPowerSetName())) {
+							judgementSlot = p;
+						} else if ("\"interface\"".equalsIgnoreCase(p.getPowerSetName())) {
+							interfaceSlot = p;
+						} else if ("\"lore\"".equalsIgnoreCase(p.getPowerSetName())) {
+							loreSlot = p;
+						} else if ("\"destiny\"".equalsIgnoreCase(p.getPowerSetName())) {
+							destinySlot = p;
+						} else if ("\"hybrid\"".equalsIgnoreCase(p.getPowerSetName())) {
+							hybridSlot = p;
+						}
+					}
+				}
+			}
+			if (hasIncarnate) {
+				System.out.println("\nINCARNATE POWERS\n================");
+				if (alphaSlot != null) {
+					System.out.println(String.format("ALPHA SLOT: %s TIER %s", alphaSlot.getPowerName(), alphaSlot.getIncarnateTier()));
+				}
+				if (judgementSlot != null) {
+					System.out.println(String.format("JUDGEMENT SLOT: %s TIER %s", judgementSlot.getPowerName(), judgementSlot.getIncarnateTier()));
+				}
+				if (interfaceSlot != null) {
+					System.out.println(String.format("INTERFACE SLOT: %s TIER %s", interfaceSlot.getPowerName(), interfaceSlot.getIncarnateTier()));
+				}
+				if (loreSlot != null) {
+					System.out.println(String.format("LORE SLOT: %s TIER %s", loreSlot.getPowerName(), loreSlot.getIncarnateTier()));
+				}
+				if (destinySlot != null) {
+					System.out.println(String.format("DESTINY SLOT: %s TIER %s", destinySlot.getPowerName(), destinySlot.getIncarnateTier()));
+				}
+				if (hybridSlot != null) {
+					System.out.println(String.format("HYBRID SLOT: %s TIER %s", hybridSlot.getPowerName(), hybridSlot.getIncarnateTier()));
+				}
+			}
+		}
 	}
 	private static Map<Integer, Power> parsePowers(String content) {
 		Map<Integer, Power> powers = new HashMap<Integer, Power>();
@@ -150,13 +177,59 @@ public class BuildInfo {
 						b.getLevel() != null ? String.format("Level %s", b.getLevel()) : "");
 
 	}
+	/***
+	 * Only return powers that are "inherent" and have been slotted.
+	 * @param powers - map of powers
+	 * @param boosts - map of enhancement slotting
+	 ***/
 	private static void findInherentPowers(final Map<Integer, Power> powers, final Map<Integer, Boost> boosts) {
 		for (Map.Entry<Integer, Power> entry : powers.entrySet()) {
 			Power p = entry.getValue();
-			if (p.isInherent()) {
-				System.out.println(outputPower(p));
-				findBoostForPower(p, boosts);
+			if ("\"inherent\"".equalsIgnoreCase(p.getCategoryName())) {
+				if (isSlotted(p.getPowerId(), boosts)) {
+					System.out.println(outputPower(p));
+					findBoostForPower(p, boosts);
+				}
 			}
 		}
+	}
+	private static boolean isSlotted(String powerId, final Map<Integer, Boost> boosts) {
+		for (Map.Entry<Integer, Boost> entry : boosts.entrySet()) {
+			Boost b = entry.getValue();
+			if (powerId.equals(b.getPowerId())) {
+				return true;
+			}
+		}
+		return false;
+	}
+	private static String parseCharName(String content) {
+		final String regex = "^Name \\\"(.+)\\\"";
+        final Pattern pattern = Pattern.compile(regex, Pattern.MULTILINE);
+        final Matcher matcher = pattern.matcher(content);
+        if (matcher.find()) {
+        	return matcher.group(1);
+        }
+		return null;
+	}
+	private static Map<String, String> parseCharacterAttribs(String content) {
+		Map<String, String> attribs = new HashMap<String, String>();
+		Scanner scanner = new Scanner(content);
+		while (scanner.hasNextLine()) {
+		  String line = scanner.nextLine();
+		  if (line.startsWith("Class ")) {
+			  attribs.put("Archetype", line.split(" ")[1]);
+		  } else if (line.startsWith("Origin ")) {
+			  attribs.put("Origin", line.split(" ")[1]);
+		  } else if (line.startsWith("Level ")) {
+			  int lvl = Integer.valueOf(line.split(" ")[1]) + 1;
+			  attribs.put("Level", String.valueOf(lvl));
+		  } else if (line.startsWith("Ents2[0].originalPrimary ")) {
+			  attribs.put("Primary", line.split(" ")[1]);
+		  } else if (line.startsWith("Ents2[0].originalSecondary ")) {
+			  attribs.put("Secondary", line.split(" ")[1]);
+		  }
+		}
+		scanner.close();
+		return attribs;
 	}
 }
