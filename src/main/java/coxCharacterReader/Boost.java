@@ -17,6 +17,18 @@ public class Boost {
 	public String getIdx() {
 		return idx;
 	}
+	/**
+	 * Convert idx into the natural slot number.
+	 * Return null as 1, add one to other values.
+	 * @return String of slot number.
+	 */
+	public String extractSlotNumber() {
+		if (idx != null) {
+			int s = Integer.valueOf(idx);
+			return String.valueOf(s+1);
+		}
+		return "1";
+	}
 	public void setIdx(String idx) {
 		this.idx = idx;
 	}

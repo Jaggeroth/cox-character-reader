@@ -17,8 +17,9 @@ import org.apache.http.util.EntityUtils;
 public class BuildInfo {
     private static final String CHAR_PAGE_URL = "https://www.cityofheroesrebirth.com/public/api/character/raw?q=<character id here>";
 
-	public static final int[] BUILD_LEVELS = new int[]{1, 2, 4, 6, 8, 10, 12, 14, 16, 18, 20, 22, 24, 26, 28, 30, 32, 35, 38, 41, 44, 47, 49};
-	public static void main(String[] args) throws IOException {
+    public static final int[] BUILD_LEVELS = new int[]{1, 2, 4, 6, 8, 10, 12, 14, 16, 18, 20, 22, 24, 26, 28, 30, 32, 35, 38, 41, 44, 47, 49};
+
+    public static void main(String[] args) throws IOException {
 		HttpClient client = HttpClientBuilder.create().build();
 		HttpGet request = new HttpGet(CHAR_PAGE_URL);
 		request.addHeader("User-Agent", "Apache HTTPClient");
@@ -31,6 +32,7 @@ public class BuildInfo {
 		boosts= parseEnhancements(charContent);
 		System.out.println("BUILD DATA\n==========");
 		System.out.println(String.format("NAME: %s", parseCharName(charContent)));
+		System.out.println(String.format("ALIGNMENT: %s", parseAlignment(charContent)));
 		Map<String, String> attribs = parseCharacterAttribs(charContent);
 		System.out.println(String.format("ORIGIN: %s", attribs.get("Origin")));
 		System.out.println(String.format("ARCHETYPE: %s", attribs.get("Archetype")));
@@ -162,19 +164,18 @@ public class BuildInfo {
 		return String.format("Powerset: %s Power: %s", p.getPowerSetName(), p.getPowerName());
 	}
 	private static String outputBoost(Boost b) {
-		return String.format("%s %s %s",
-				b.getIdx() != null ? String.format("Slot %s:", b.getIdx()) : "Inherent slot:",
-						b.getBoostName(),
-						b.getLevel() != null ? String.format("Level %s", b.getLevel()) : "");
+		return String.format("%s %s %s",String.format("Slot %s:", b.extractSlotNumber()),
+				b.getBoostName(),
+				b.getLevel() != null ? String.format("Level %s", b.getLevel()) : "");
 
 	}
 	private static String outputBoost(Boost b, Power p) {
 		if (p == null)
 			return outputBoost(b);
 		return String.format("%s %s %s",
-				b.getIdx() != null ? String.format("Slot %s for %s:", b.getIdx(), p.getPowerName()) : String.format("Inherent slot for %s:",p.getPowerName()),
-						b.getBoostName(),
-						b.getLevel() != null ? String.format("Level %s", b.getLevel()) : "");
+				String.format("Slot %s for %s:", b.extractSlotNumber(), p.getPowerName()),
+				b.getBoostName(),
+				b.getLevel() != null ? String.format("Level %s", b.getLevel()) : "");
 
 	}
 	/***
@@ -231,5 +232,34 @@ public class BuildInfo {
 		}
 		scanner.close();
 		return attribs;
+	}
+	private static String parseAlignment(String content) {
+		String playerType = getFirstHit("PlayerType (.+)", content);
+		String playerSubType = getFirstHit("PlayerSubType (.+)", content);
+		String praetorianProgress = getFirstHit("PraetorianProgress (.+)", content);
+		if (playerType == null && playerSubType == null && (praetorianProgress == null || "3".equalsIgnoreCase(praetorianProgress))) {
+			return "Hero";
+		} else if ("1".equalsIgnoreCase(playerType) && (playerSubType == null && (praetorianProgress == null || "3".equalsIgnoreCase(praetorianProgress)))) {
+			return "Villain";
+		} else if (playerType == null && "2".equalsIgnoreCase(playerSubType)) {
+			return "Vigilante";
+		} else if ("1".equalsIgnoreCase(playerType) && "2".equalsIgnoreCase(playerSubType)) {
+			return "Rogue";
+		} else if (playerType == null && "2".equalsIgnoreCase(praetorianProgress)) {
+			return "Resistance";
+		} else if ("1".equalsIgnoreCase(playerType) && "2".equalsIgnoreCase(praetorianProgress)) {
+			return "Loyalist";
+		} else if ("6".equalsIgnoreCase(praetorianProgress)) {
+			return "Praetorian";
+		}
+		return null;
+	}
+	private static String getFirstHit(final String regex, final String content) {
+        final Pattern pattern = Pattern.compile(regex, Pattern.MULTILINE);
+        final Matcher matcher = pattern.matcher(content);
+        if (matcher.find()) {
+        	return matcher.group(1);
+        }
+		return null;
 	}
 }
