@@ -16,7 +16,7 @@ import org.apache.http.util.EntityUtils;
 
 public class BuildInfo {
     private static final String CHAR_PAGE_URL = "https://www.cityofheroesrebirth.com/public/api/character/raw?q=<character id here>";
-
+    
     public static final int[] BUILD_LEVELS = new int[]{1, 2, 4, 6, 8, 10, 12, 14, 16, 18, 20, 22, 24, 26, 28, 30, 32, 35, 38, 41, 44, 47, 49};
 
     public static void main(String[] args) throws IOException {
