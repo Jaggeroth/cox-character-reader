@@ -1,0 +1,45 @@
+body {
+  background-color: black;
+  color: white;
+  font: 14px "Trebuchet MS", Arial, Helvetica;
+}
+h1 {
+  vertical-align: top;
+}
+table.powertable {
+  background-color: transparent;
+  background-image: url("../images/power_bar.png"); 
+  width: 400px;
+  background-repeat: no-repeat;
+  background-size: 400px 36px;
+  vertical-align: top;
+}
+td.powercol {
+  background-color: transparent;
+  vertical-align: top;
+  width: 36px;
+}
+p {
+  background-image: url("../images/power_bar.png"); 
+  background-repeat: no-repeat;
+}
+img.powericon {
+  top: 2px;
+  left: 2px;
+  vertical-align: top;
+}
+@media only screen and (max-width: 820px) {
+  .layout {
+    column-count: 1;
+  }
+}
+@media only screen and (min-width: 820px) {
+  .layout {
+    column-count: 2;
+  }
+}
+@media only screen and (min-width: 1240px) {
+  .layout {
+    column-count: 3;
+  }
+}

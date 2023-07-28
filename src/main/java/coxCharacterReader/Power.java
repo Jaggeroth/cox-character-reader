@@ -83,15 +83,17 @@ public class Power {
 		}
 	}
 	public boolean isBuildOption() {
-		if ("\"temporary_powers\"".equalsIgnoreCase(getCategoryName())) {
+		if ("temporary_powers".equalsIgnoreCase(getCategoryName())) {
 			return false;
-		} else if ("\"inherent\"".equalsIgnoreCase(getCategoryName())) {
+		} else if ("inherent".equalsIgnoreCase(getCategoryName())) {
+			return false;
+		} else if ("incarnate".equalsIgnoreCase(getCategoryName())) {
 			return false;
 		}
 		return true;
 	}
 	public boolean isIncarnatePower() {
-		if ("\"incarnate\"".equalsIgnoreCase(getCategoryName())) {
+		if ("incarnate".equalsIgnoreCase(getCategoryName())) {
 			return true;
 		}
 		return false;
@@ -99,31 +101,32 @@ public class Power {
 	public String getIncarnateTier() {
 		if (isIncarnatePower()) {
 			int l = getPowerName().split("_").length;
-			if ("\"alpha\"".equalsIgnoreCase(getPowerSetName())) {
-				if (getPowerName().endsWith("paragon\"")) {
+			if ("alpha".equalsIgnoreCase(getPowerSetName())) {
+				if (getPowerName().toLowerCase().endsWith("paragon")) {
 					return "4";
 				}
-			} else if ("\"judgement\"".equalsIgnoreCase(getPowerSetName())) {
-				if (getPowerName().endsWith("final_judgement\"")) {
+			} else if ("judgement".equalsIgnoreCase(getPowerSetName())) {
+				if (getPowerName().toLowerCase().endsWith("final_judgement")) {
 					return "4";
 				}
-			} else if ("\"interface\"".equalsIgnoreCase(getPowerSetName())) {
-				if (getPowerName().endsWith("flawless_interface\"")) {
+			} else if ("interface".equalsIgnoreCase(getPowerSetName())) {
+				if (getPowerName().toLowerCase().endsWith("flawless_interface")) {
 					return "4";
 				}
-			} else if ("\"lore\"".equalsIgnoreCase(getPowerSetName())) {
-				if (getPowerName().endsWith("superior_ally\"")) {
+			} else if ("lore".equalsIgnoreCase(getPowerSetName())) {
+				if (getPowerName().toLowerCase().endsWith("superior_ally")) {
 					return "4";
-				} else if (getPowerName().endsWith("improved_ally\"")) {
+				} else if (getPowerName().toLowerCase().endsWith("improved_ally")) {
 					return "3";
 				}
-			} else if ("\"destiny\"".equalsIgnoreCase(getPowerSetName())) {
-				if (getPowerName().endsWith("epiphany\"")) {
+			} else if ("destiny".equalsIgnoreCase(getPowerSetName())) {
+				if (getPowerName().toLowerCase().endsWith("epiphany")) {
 					return "4";
 				}
-			} else if ("\"hybrid\"".equalsIgnoreCase(getPowerSetName())) {
-				if (getPowerName().startsWith("\"support_genome") || getPowerName().startsWith("\"melee_genome")) {
-					int num = Integer.valueOf(getPowerName().substring(getPowerName().length() - 2,getPowerName().length() - 1));
+			} else if ("hybrid".equalsIgnoreCase(getPowerSetName())) {
+				if (getPowerName().toLowerCase().startsWith("support_genome") || getPowerName().toLowerCase().startsWith("melee_genome")) {
+					String sNum = getPowerName().substring(getPowerName().length() - 1);
+					int num = Integer.valueOf(sNum);
 					if (num > 7) {
 						return "4";
 					} else if (num > 3) {
@@ -133,7 +136,7 @@ public class Power {
 					} else {
 						return "1";
 					}
-				} else if (getPowerName().endsWith("embodiment\"")) {
+				} else if (getPowerName().toLowerCase().endsWith("embodiment")) {
 					return "4";
 				}
 			}
