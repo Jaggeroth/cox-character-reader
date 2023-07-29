@@ -29,37 +29,30 @@ public class HtmlBuildInfo {
 	private static final String UNKNOWN_ICON = "images\\unknown.png";
     //private static final String CHAR_PAGE_URL = "https://www.cityofheroesrebirth.com/public/api/character/raw?q=<character id here>";
 	// Power Jenny
-	private static final String CHAR_PAGE_URL = "https://www.cityofheroesrebirth.com/public/api/character/raw?q=brGxzOVXny%2Fg7%2FnbZnQtig%3D%3D";
-    // Officer Morgan
-    //private static final String CHAR_PAGE_URL = "https://www.cityofheroesrebirth.com/public/api/character/raw?q=oYhL8jGfTiiLJ4PYl3rEWg%3D%3D";
-	// Lilly Hammer
-	//private static final String CHAR_PAGE_URL = "https://www.cityofheroesrebirth.com/public/api/character/raw?q=m3xk569OxXoDEDBueB%2B3rw%3D%3D";
-	// Handshake
-	//private static final String CHAR_PAGE_URL = "https://www.cityofheroesrebirth.com/public/api/character/raw?q=1G8d3Fy22ly7dM19FCPUgw%3D%3D";
-	// Murder Muse
-	//private static final String CHAR_PAGE_URL = "https://www.cityofheroesrebirth.com/public/api/character/raw?q=mQ2Wzt57EOHCQ1H55Eex0w%3D%3D";
-	// Umbre Ella
-	//private static final String CHAR_PAGE_URL = "https://www.cityofheroesrebirth.com/public/api/character/raw?q=iAcoxLtMWZUb3EuzPdErXg%3D%3D";
-	// Bonefire
-	//private static final String CHAR_PAGE_URL = "https://www.cityofheroesrebirth.com/public/api/character/raw?q=dpJYf%2FM4lp7thQccPRGXSw%3D%3D";
-	// Winter
-	//private static final String CHAR_PAGE_URL = "https://www.cityofheroesrebirth.com/public/api/character/raw?q=08nGByBakqt1vF4f%2FIWUUA%3D%3D";
-	// Wayland
-	//private static final String CHAR_PAGE_URL = "https://www.cityofheroesrebirth.com/public/api/character/raw?q=vGDdAJqPKhpLz2b8ap3SmQ%3D%3D";
-	// Taurox
-	//private static final String CHAR_PAGE_URL = "https://www.cityofheroesrebirth.com/public/api/character/raw?q=cVlp1io8M6FQmfGbqWYb1Q%3D%3D";
-	// Buck Kinnear
-	//private static final String CHAR_PAGE_URL = "https://www.cityofheroesrebirth.com/public/api/character/raw?q=gsWKJ216aFprWwoIHwMPuw%3D%3D";
+	//private static final String CHAR_PAGE_URL = "https://www.cityofheroesrebirth.com/public/api/character/raw?q=brGxzOVXny%2Fg7%2FnbZnQtig%3D%3D";
+	// Enigma Tick
+	private static final String CHAR_PAGE_URL = "https://www.cityofheroesrebirth.com/public/api/character/raw?q=7TuqbPdjm0h8KH6nOf8olA%3D%3D";
     
     public static final int[] BUILD_LEVELS = new int[]{1, 2, 4, 6, 8, 10, 12, 14, 16, 18, 20, 22, 24, 26, 28, 30, 32, 35, 38, 41, 44, 47, 49};
 
     public static void main(String[] args) throws IOException {
     	HtmlBuildInfo hbi = new HtmlBuildInfo();
-    	hbi.extractExecute("C:\\Data\\Workspace2109\\cox-character-reader\\src\\main\\characters\\power_jenny.html", CHAR_PAGE_URL);
+    	hbi.extractExecute("C:\\Data\\Workspace2109\\cox-character-reader\\src\\main\\characters\\enigma_tick.html", CHAR_PAGE_URL);
 	}
 
     public void execute(String filename, String charContent) throws IOException {
     	Properties iconsData = getIcons();
+		Map<String, String> attribs = parseCharacterAttribs(charContent);
+		String alignment = parseAlignment(charContent);
+		String origin = attribs.get("Origin");
+		String architype = attribs.get("Archetype");
+		Integer characterLevel = 0;
+		try {
+		characterLevel = Integer.parseInt(attribs.get("Level"));
+		} catch (NumberFormatException e) {
+			// do nothing happens when char has not been played
+		}
+		
 		Map<Integer, Power> powers = new HashMap<Integer, Power>();
 		powers = parsePowers(charContent);
 		Map<Integer, Boost> boosts  = new HashMap<Integer, Boost>();
@@ -69,16 +62,6 @@ public class HtmlBuildInfo {
 		BufferedWriter writer = new BufferedWriter(new FileWriter(file,true));
 		
 		writer.write(getHeaderHtml());
-		Map<String, String> attribs = parseCharacterAttribs(charContent);
-		String alignment = parseAlignment(charContent);
-		String origin = attribs.get("Origin");
-		String architype = attribs.get("Archetype");
-		Integer characterLevel = 0;
-		try {
-		characterLevel = Integer.parseInt(attribs.get("Level"));
-		} catch (NumberFormatException e) {
-			// do nothing happend when char not played
-		}
 		writer.write(String.format("<h1>%s %s %s</h1>",
 				getAlignmentIcon(iconsData, alignment),
 				parseCharName(charContent),
@@ -163,108 +146,13 @@ public class HtmlBuildInfo {
     }
  
     public void extractExecute(String filename, String characterUrl) throws IOException {
-    	Properties iconsData = getIcons();
 		HttpClient client = HttpClientBuilder.create().build();
 		HttpGet request = new HttpGet(characterUrl);
 		request.addHeader("User-Agent", "Apache HTTPClient");
 		HttpResponse response = client.execute(request);
 		HttpEntity entity = response.getEntity();
 		String charContent = EntityUtils.toString(entity);
-		Map<Integer, Power> powers = new HashMap<Integer, Power>();
-		powers = parsePowers(charContent);
-		Map<Integer, Boost> boosts  = new HashMap<Integer, Boost>();
-		boosts= parseEnhancements(charContent);
-
-		File file = new File(filename);
-		BufferedWriter writer = new BufferedWriter(new FileWriter(file,true));
-		
-		writer.write(getHeaderHtml());
-		Map<String, String> attribs = parseCharacterAttribs(charContent);
-		String alignment = parseAlignment(charContent);
-		String origin = attribs.get("Origin");
-		String architype = attribs.get("Archetype");
-		Integer characterLevel = Integer.parseInt(attribs.get("Level"));
-		writer.write(String.format("<h1>%s %s %s</h1>",
-				getAlignmentIcon(iconsData, alignment),
-				parseCharName(charContent),
-				getOriginIcon(iconsData, origin)));
-		writer.write(String.format("<h2>%s LEVEL %s %s / %s %s</h2>",
-				getArchitypeIcon(iconsData, architype),
-				characterLevel,
-				attribs.get("Primary"),
-				attribs.get("Secondary"),
-				architype));
-		writer.write("<div class=\"layout\">\n<h3>INHERENT POWERS</h3>");
-		writer.write(findInherentPowers(powers, boosts, iconsData));
-		writer.write("<h3>POWERS</h3>");
-		for (int buildLevel : BUILD_LEVELS) {
-			if (buildLevel <= characterLevel) {
-				//System.out.println(String.format("<h3>LEVEL %s</h3>", buildLevel));
-				writer.write(findPower(buildLevel,powers, boosts, iconsData));
-			}
-		}
-		/***
-		 * Check for and display Incarnate powers
-		 **/
-		if (characterLevel >= 50) {
-			Power alphaSlot = null;
-			Power judgementSlot = null;
-			Power interfaceSlot = null;
-			Power loreSlot = null;
-			Power destinySlot = null;
-			Power hybridSlot = null;
-			Power genesisSlot = null;
-			boolean hasIncarnate = false;
-			for (Map.Entry<Integer, Power> entry : powers.entrySet()) {
-				Power p = entry.getValue();
-				if (p.isIncarnatePower()) {
-					if (p.getDisabled()==null) {
-						hasIncarnate = true;
-						if ("alpha".equalsIgnoreCase(p.getPowerSetName())) {
-							alphaSlot = p;
-						} else if ("judgement".equalsIgnoreCase(p.getPowerSetName())) {
-							judgementSlot = p;
-						} else if ("interface".equalsIgnoreCase(p.getPowerSetName())) {
-							interfaceSlot = p;
-						} else if ("lore".equalsIgnoreCase(p.getPowerSetName())) {
-							loreSlot = p;
-						} else if ("destiny".equalsIgnoreCase(p.getPowerSetName())) {
-							destinySlot = p;
-						} else if ("hybrid".equalsIgnoreCase(p.getPowerSetName())) {
-							hybridSlot = p;
-						} else if ("genesis".equalsIgnoreCase(p.getPowerSetName())) {
-							genesisSlot = p;
-						}
-					}
-				}
-			}
-			if (hasIncarnate) {
-				writer.write("<h3>INCARNATE POWERS</h3>");
-				if (alphaSlot != null) {
-					writer.write(String.format("ALPHA SLOT: %s TIER %s<br/>", alphaSlot.getPowerName(), alphaSlot.getIncarnateTier()));
-				}
-				if (judgementSlot != null) {
-					writer.write(String.format("JUDGEMENT SLOT: %s TIER %s<br/>", judgementSlot.getPowerName(), judgementSlot.getIncarnateTier()));
-				}
-				if (interfaceSlot != null) {
-					writer.write(String.format("INTERFACE SLOT: %s TIER %s<br/>", interfaceSlot.getPowerName(), interfaceSlot.getIncarnateTier()));
-				}
-				if (loreSlot != null) {
-					writer.write(String.format("LORE SLOT: %s TIER %s<br/>", loreSlot.getPowerName(), loreSlot.getIncarnateTier()));
-				}
-				if (destinySlot != null) {
-					writer.write(String.format("DESTINY SLOT: %s TIER %s<br/>", destinySlot.getPowerName(), destinySlot.getIncarnateTier()));
-				}
-				if (hybridSlot != null) {
-					writer.write(String.format("HYBRID SLOT: %s TIER %s<br/>", hybridSlot.getPowerName(), hybridSlot.getIncarnateTier()));
-				}
-				if (genesisSlot != null) {
-					writer.write(String.format("GENESIS SLOT: %s TIER %s<br/>", genesisSlot.getPowerName(), genesisSlot.getIncarnateTier()));
-				}
-			}
-		}
-		writer.write(getFooterHtml());
-		writer.close();
+		execute(filename, charContent);
     }
 
     private static Map<Integer, Power> parsePowers(String content) {
