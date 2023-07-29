@@ -46,6 +46,8 @@ public class HtmlBuildInfo {
 		String alignment = parseAlignment(charContent);
 		String origin = attribs.get("Origin");
 		String architype = attribs.get("Archetype");
+		String primary = attribs.get("Primary");
+		String secondary = attribs.get("Secondary");
 		Integer characterLevel = 0;
 		try {
 		characterLevel = Integer.parseInt(attribs.get("Level"));
@@ -54,7 +56,7 @@ public class HtmlBuildInfo {
 		}
 		
 		Map<Integer, Power> powers = new HashMap<Integer, Power>();
-		powers = parsePowers(charContent);
+		powers = parsePowers(charContent, primary, secondary);
 		Map<Integer, Boost> boosts  = new HashMap<Integer, Boost>();
 		boosts= parseEnhancements(charContent);
 
@@ -69,8 +71,8 @@ public class HtmlBuildInfo {
 		writer.write(String.format("<h2>%s LEVEL %s %s / %s %s</h2>",
 				getArchitypeIcon(iconsData, architype),
 				characterLevel,
-				attribs.get("Primary"),
-				attribs.get("Secondary"),
+				primary,
+				secondary,
 				architype));
 		writer.write("<div class=\"layout\">\n<h3>INHERENT POWERS</h3>");
 		writer.write(findInherentPowers(powers, boosts, iconsData));
@@ -155,7 +157,7 @@ public class HtmlBuildInfo {
 		execute(filename, charContent);
     }
 
-    private static Map<Integer, Power> parsePowers(String content) {
+    private static Map<Integer, Power> parsePowers(String content, String primary, String secondary) {
 		Map<Integer, Power> powers = new HashMap<Integer, Power>();
 		final String regex = "Powers\\[(\\d*)\\].([a-zA-Z]*)\\s(\\S*)";
 		final Pattern pattern = Pattern.compile(regex, Pattern.MULTILINE);
@@ -167,6 +169,12 @@ public class HtmlBuildInfo {
 				p = new Power();
 			}
 			p.setProperty(matcher.group(2).replace("\"", ""), matcher.group(3).replace("\"", ""));
+			// sometimes we need to set power level bought as it is missing on primary & secondary powers 
+			if (primary.equalsIgnoreCase(p.getPowerSetName()) || secondary.equalsIgnoreCase(p.getPowerSetName())) {
+				if (p.getPowerLevelBought() == null) {
+					p.setPowerLevelBought("0");
+				}
+			}
 			powers.put(num, p);
 		}
 		return powers;
@@ -194,7 +202,7 @@ public class HtmlBuildInfo {
 		String result = "";
 		for (Map.Entry<Integer, Power> entry : powers.entrySet()) {
 			Power p = entry.getValue();
-			if (Integer.valueOf(p.getPowerLevelBought()).compareTo(forLevel)==0) {
+			if (Integer.valueOf(p.extractPowerLevelBought()).compareTo(forLevel)==0) {
 				if (p.isBuildOption()) {
 					result = result + TB_POWER;
 					result = result + String.format(TB_POWER_ROW, getPowerIcon(iconsData, p), 

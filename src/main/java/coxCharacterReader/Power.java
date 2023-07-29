@@ -21,6 +21,9 @@ public class Power {
 		return categoryName;
 	}
 	public String getPowerLevelBought() {
+		return powerLevelBought; // != null ? powerLevelBought : getPowerSetLevelBought();
+	}
+	public String extractPowerLevelBought() {
 		return powerLevelBought != null ? powerLevelBought : getPowerSetLevelBought();
 	}
 	public void setPowerLevelBought(String powerLevelBought) {
