@@ -332,7 +332,9 @@ public class HtmlBuildInfo {
 			}
 		}
 		while (c<7) {
-			result = result + "<td></td>";
+			result = result + "<td style=\"width: 32px, height: 32px;\">" + 
+		        "<img src=\"..\\images\\blank.png\" title=\"Kick\" width=\"32\" height=\"32\">" + 
+			    "</td>";
 			c++;
 		}
 		return result;
