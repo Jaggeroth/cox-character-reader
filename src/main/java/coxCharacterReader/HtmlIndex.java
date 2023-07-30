@@ -40,12 +40,12 @@ public class HtmlIndex {
 	private static final String LOGIN_URL = "https://www.cityofheroesrebirth.com/public/login";
 	private static final String MANAGE_URL = "https://www.cityofheroesrebirth.com/public/manage";
 	private static final String CHAR_PAGE_URL = "https://www.cityofheroesrebirth.com/public/api/character/raw?q=";
-	private static final String LI_CHAR = "<li><a href=\"%s.html\" target=\"charinfo\">%s</a></li>";
+	private static final String LI_CHAR = "<li><a href=\"%s.html\" target=\"charinfo\">%s %s %s (%s) %s</a></li>";
 	private static final String CHAR_DIR = "C:\\Data\\Workspace2109\\cox-character-reader\\src\\main\\characters\\%s.html";
 
 	public static void main(String[] args) throws IOException {
 		Properties p = getConfig();
-		Map<String, String> treeMap = new TreeMap<String, String>();
+		Map<String, CharacterProfile> treeMap = new TreeMap<String, CharacterProfile>();
 		System.out.println("START");
 		for (RebirthAccount account : getAccounts(p)) {
 	        CookieStore cookieStore = new BasicCookieStore();
@@ -84,17 +84,22 @@ public class HtmlIndex {
 				System.out.println(name);
 				String charFileName = parseFileName(name);
 				HtmlBuildInfo hbi = new HtmlBuildInfo();
-				hbi.execute(String.format(CHAR_DIR, charFileName), charContent);
-				treeMap.put(name, charFileName);
+				CharacterProfile cp = hbi.execute(String.format(CHAR_DIR, charFileName), charContent);
+				cp.setFilename(charFileName);
+				treeMap.put(name, cp);
 			}
 		}
 		System.out.println("INDEX");
 		File file = new File(String.format(CHAR_DIR, "index"));
 		BufferedWriter writer = new BufferedWriter(new FileWriter(file,true));
 		writer.write(getHeaderHtml());
-        for (Map.Entry<String, String> entry : treeMap.entrySet()) {
+        for (Map.Entry<String, CharacterProfile> entry : treeMap.entrySet()) {
         	writer.write(String.format(LI_CHAR,
-            		entry.getValue(),
+        			entry.getValue().getFilename(),
+        			entry.getValue().getOrigin(),
+        			entry.getValue().getAlignment(),
+        			entry.getValue().getArchitype(),
+            		entry.getValue().getLevel(),
             		entry.getKey()));
         }
         writer.write(getFooterHtml());

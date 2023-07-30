@@ -40,7 +40,7 @@ public class HtmlBuildInfo {
     	hbi.extractExecute("C:\\Data\\Workspace2109\\cox-character-reader\\src\\main\\characters\\enigma_tick.html", CHAR_PAGE_URL);
 	}
 
-    public void execute(String filename, String charContent) throws IOException {
+    public CharacterProfile execute(String filename, String charContent) throws IOException {
     	Properties iconsData = getIcons();
 		Map<String, String> attribs = parseCharacterAttribs(charContent);
 		String alignment = parseAlignment(charContent);
@@ -48,6 +48,7 @@ public class HtmlBuildInfo {
 		String architype = attribs.get("Archetype");
 		String primary = attribs.get("Primary");
 		String secondary = attribs.get("Secondary");
+		String name = parseCharName(charContent);
 		Integer characterLevel = 0;
 		try {
 		characterLevel = Integer.parseInt(attribs.get("Level"));
@@ -66,7 +67,7 @@ public class HtmlBuildInfo {
 		writer.write(getHeaderHtml());
 		writer.write(String.format("<h1>%s %s %s</h1>",
 				getAlignmentIcon(iconsData, alignment),
-				parseCharName(charContent),
+				name,
 				getOriginIcon(iconsData, origin)));
 		writer.write(String.format("<h2>%s LEVEL %s %s / %s %s</h2>",
 				getArchitypeIcon(iconsData, architype),
@@ -145,16 +146,23 @@ public class HtmlBuildInfo {
 		}
 		writer.write(getFooterHtml());
 		writer.close();
+		return new CharacterProfile(name, getArchitypeIcon(iconsData, architype),
+				getAlignmentIcon(iconsData, alignment),
+				characterLevel,
+				getOriginIcon(iconsData, origin),
+				primary,
+				secondary,
+				filename);
     }
  
-    public void extractExecute(String filename, String characterUrl) throws IOException {
+    public CharacterProfile extractExecute(String filename, String characterUrl) throws IOException {
 		HttpClient client = HttpClientBuilder.create().build();
 		HttpGet request = new HttpGet(characterUrl);
 		request.addHeader("User-Agent", "Apache HTTPClient");
 		HttpResponse response = client.execute(request);
 		HttpEntity entity = response.getEntity();
 		String charContent = EntityUtils.toString(entity);
-		execute(filename, charContent);
+		return execute(filename, charContent);
     }
 
     private static Map<Integer, Power> parsePowers(String content, String primary, String secondary) {
