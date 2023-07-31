@@ -216,6 +216,7 @@ public class HtmlIndex {
 				+ "<html>\n"
 				+ "<head>\n"
 				+ "<link rel=\"stylesheet\" href=\"..\\css\\build.css\" type=\"text/css\" />\n"
+				+ "<title>Character Index</title>"
 				+ "</head>\n"
 				+ "<body>\n"
 				+ "<div class=\"layout\">\n"

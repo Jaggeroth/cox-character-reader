@@ -25,7 +25,7 @@ public class HtmlBuildInfo {
 	private static final String TB_POWER_ROW = "<tr><td class=\"powercol\" rowspan=\"2\">%s</td><td colspan=\"7\">%s</td></tr>";
 	private static final String TB_ENHANCEMENT_CELL = "<td style=\"width: 36px;\">%s</td>";
 	private static final String UNKNOWN_ICON = "images\\unknown.png";
-	private static final String CHAR_TITLE = "Level %s %s %s / %s %s : %s";
+	private static final String CHAR_TITLE = "Level %s %s / %s %s %s %s : %s";
     //private static final String CHAR_PAGE_URL = "https://www.cityofheroesrebirth.com/public/api/character/raw?q=<character id here>";
 	// Enigma Tick
 	private static final String CHAR_PAGE_URL = "https://www.cityofheroesrebirth.com/public/api/character/raw?q=7TuqbPdjm0h8KH6nOf8olA%3D%3D";
@@ -52,6 +52,14 @@ public class HtmlBuildInfo {
 		} catch (NumberFormatException e) {
 			// do nothing happens when char has not been played
 		}
+		String char_page_title = String.format(CHAR_TITLE,
+				characterLevel,
+				primary,
+				secondary,
+				origin,
+				alignment,
+				architype,
+				name);
 		
 		Map<Integer, Power> powers = new HashMap<Integer, Power>();
 		powers = parsePowers(charContent, primary, secondary);
@@ -61,7 +69,7 @@ public class HtmlBuildInfo {
 		File file = new File(filename);
 		BufferedWriter writer = new BufferedWriter(new FileWriter(file,true));
 		
-		writer.write(getHeaderHtml());
+		writer.write(getHeaderHtml(char_page_title));
 		writer.write(String.format("<h1>%s %s %s</h1>",
 				getAlignmentIcon(iconsData, alignment),
 				name,
@@ -150,13 +158,7 @@ public class HtmlBuildInfo {
 				primary,
 				secondary,
 				filename,
-				String.format(CHAR_TITLE,
-						characterLevel,
-						origin,
-						primary,
-						secondary,
-						alignment,
-						name));
+				char_page_title);
     }
  
     public CharacterProfile extractExecute(String filename, String characterUrl) throws IOException {
@@ -405,11 +407,12 @@ public class HtmlBuildInfo {
 		}
 		throw new IOException("Invalid Config File: Missing Parameters");
 	}
-	private static String getHeaderHtml() {
+	private static String getHeaderHtml(String title) {
 		return "<!DOCTYPE html>\n"
 				+ "<html>\n"
 				+ "<head>\n"
 				+ "<link rel=\"stylesheet\" href=\"..\\css\\build.css\" type=\"text/css\" />\n"
+				+ "<title>" + title + "</title>\n"
 				+ "</head>"
 				+ "<body>";	
 	}
