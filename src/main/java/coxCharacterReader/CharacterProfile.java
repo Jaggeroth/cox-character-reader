@@ -9,7 +9,8 @@ public class CharacterProfile {
 	private String primary;
 	private String secondary;
 	private String filename;
-	public CharacterProfile(String name, String architype, String alignment, String level, String origin, String primary, String secondary, String filename) {
+	private String title;
+	public CharacterProfile(String name, String architype, String alignment, String level, String origin, String primary, String secondary, String filename, String title) {
 		this.name = name;
 		this.architype = architype;
 		this.alignment = alignment;
@@ -18,8 +19,9 @@ public class CharacterProfile {
 		this.primary = primary;
 		this.secondary = secondary;
 		this.filename = filename;
+		this.title = title;
 	}
-	public CharacterProfile(String name, String architype, String alignment, int level, String origin, String primary, String secondary, String filename) {
+	public CharacterProfile(String name, String architype, String alignment, int level, String origin, String primary, String secondary, String filename, String title) {
 		this.name = name;
 		this.architype = architype;
 		this.alignment = alignment;
@@ -28,6 +30,7 @@ public class CharacterProfile {
 		this.primary = primary;
 		this.secondary = secondary;
 		this.filename = filename;
+		this.title = title;
 	}
 	public String getName() {
 		return name;
@@ -76,5 +79,11 @@ public class CharacterProfile {
 	}
 	public void setFilename(String filename) {
 		this.filename = filename;
+	}
+	public String getTitle() {
+		return title;
+	}
+	public void setTitle(String title) {
+		this.title = title;
 	}
 }

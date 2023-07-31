@@ -22,14 +22,11 @@ import org.apache.http.util.EntityUtils;
 public class HtmlBuildInfo {
 	private static final String IMG_TAG = "<img src=\"..\\%s\" title=\"%s\" width=\"32\" height=\"32\">";
 	private static final String TB_POWER = "<table class=\"powertable\">";
-	//private static final String TB_ROW = "<tr><td>%s</td><td>%s</td></tr>";
 	private static final String TB_POWER_ROW = "<tr><td class=\"powercol\" rowspan=\"2\">%s</td><td colspan=\"7\">%s</td></tr>";
-	//private static final String TB_POWER_CELL = "<td>%s</td>";
 	private static final String TB_ENHANCEMENT_CELL = "<td style=\"width: 36px;\">%s</td>";
 	private static final String UNKNOWN_ICON = "images\\unknown.png";
+	private static final String CHAR_TITLE = "Level %s %s %s / %s %s : %s";
     //private static final String CHAR_PAGE_URL = "https://www.cityofheroesrebirth.com/public/api/character/raw?q=<character id here>";
-	// Power Jenny
-	//private static final String CHAR_PAGE_URL = "https://www.cityofheroesrebirth.com/public/api/character/raw?q=brGxzOVXny%2Fg7%2FnbZnQtig%3D%3D";
 	// Enigma Tick
 	private static final String CHAR_PAGE_URL = "https://www.cityofheroesrebirth.com/public/api/character/raw?q=7TuqbPdjm0h8KH6nOf8olA%3D%3D";
     
@@ -152,7 +149,14 @@ public class HtmlBuildInfo {
 				getOriginIcon(iconsData, origin),
 				primary,
 				secondary,
-				filename);
+				filename,
+				String.format(CHAR_TITLE,
+						characterLevel,
+						origin,
+						primary,
+						secondary,
+						alignment,
+						name));
     }
  
     public CharacterProfile extractExecute(String filename, String characterUrl) throws IOException {

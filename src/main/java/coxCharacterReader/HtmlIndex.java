@@ -40,7 +40,7 @@ public class HtmlIndex {
 	private static final String LOGIN_URL = "https://www.cityofheroesrebirth.com/public/login";
 	private static final String MANAGE_URL = "https://www.cityofheroesrebirth.com/public/manage";
 	private static final String CHAR_PAGE_URL = "https://www.cityofheroesrebirth.com/public/api/character/raw?q=";
-	private static final String LI_CHAR = "<li><a href=\"%s.html\" target=\"charinfo\">%s %s %s (%s) %s</a></li>";
+	private static final String LI_CHAR = "<li title=\"%s\"><a href=\"%s.html\" target=\"charinfo\">%s %s %s (%s) %s</a></li>";
 	private static final String CHAR_DIR = "C:\\Data\\Workspace2109\\cox-character-reader\\src\\main\\characters\\%s.html";
 
 	public static void main(String[] args) throws IOException {
@@ -95,6 +95,7 @@ public class HtmlIndex {
 		writer.write(getHeaderHtml());
         for (Map.Entry<String, CharacterProfile> entry : treeMap.entrySet()) {
         	writer.write(String.format(LI_CHAR,
+        			entry.getValue().getTitle(),
         			entry.getValue().getFilename(),
         			entry.getValue().getOrigin(),
         			entry.getValue().getAlignment(),
