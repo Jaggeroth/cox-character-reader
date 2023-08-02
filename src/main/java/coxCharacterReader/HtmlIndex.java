@@ -41,7 +41,6 @@ public class HtmlIndex {
 	private static final String MANAGE_URL = "https://www.cityofheroesrebirth.com/public/manage";
 	private static final String CHAR_PAGE_URL = "https://www.cityofheroesrebirth.com/public/api/character/raw?q=";
 	private static final String LI_CHAR = "<li title=\"%s\"><a href=\"%s.html\" target=\"charinfo\">%s %s %s (%s) %s</a></li>";
-	//private static final String CHAR_DIR = "C:\\Data\\Workspace2109\\cox-character-reader\\src\\main\\characters\\%s.html";
 	
 	private static class CharacterFile {
 		private String characterName;

@@ -25,8 +25,6 @@ public class HtmlBuildInfo {
 	private static final String TB_POWER_ROW = "<tr><td class=\"powercol\" rowspan=\"2\">%s</td><td colspan=\"7\">%s</td></tr>";
 	private static final String TB_ENHANCEMENT_CELL = "<td style=\"width: 36px;\">%s</td>";
 	private static final String UNKNOWN_ICON = "images\\unknown.png";
-	//private static final String CHAR_TITLE = "Level %s %s / %s %s %s %s : %s";
-	// Power Jenny : lvl 50 Magic Invulnerability / Super Strength Tanker Hero
 	private static final String CHAR_TITLE = "%s : lvl %s %s %s / %s %s %s";
     //private static final String CHAR_PAGE_URL = "https://www.cityofheroesrebirth.com/public/api/character/raw?q=<character id here>";
 	// Enigma Tick
@@ -36,7 +34,7 @@ public class HtmlBuildInfo {
 
     public static void main(String[] args) throws IOException {
     	HtmlBuildInfo hbi = new HtmlBuildInfo();
-    	hbi.extractExecute("C:\\Data\\Docs\\hero-id\\characters\\enigma_tick.html", CHAR_PAGE_URL);
+    	hbi.extractExecute("C:\\Data\\Docs\\hero-id\\characters\\test_char.html", CHAR_PAGE_URL);
 	}
 
     public CharacterProfile execute(String filename, String charContent) throws IOException {
