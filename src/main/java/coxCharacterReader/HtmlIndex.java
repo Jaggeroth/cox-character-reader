@@ -117,9 +117,7 @@ public class HtmlIndex {
 				System.out.println(name);
 				String charFileName = parseFileName(name);
 				CharacterFile cf = new CharacterFile(name, p.getProperty("character_dir"));
-				System.out.println(cf);
 				HtmlBuildInfo hbi = new HtmlBuildInfo();
-				//CharacterProfile cp = hbi.execute(String.format(CHAR_DIR, charFileName), charContent);
 				CharacterProfile cp = hbi.execute(cf.getPathFileName(), charContent);
 				cp.setFilename(charFileName);
 				treeMap.put(name, cp);

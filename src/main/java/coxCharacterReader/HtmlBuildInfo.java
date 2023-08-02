@@ -33,8 +33,10 @@ public class HtmlBuildInfo {
     public static final int[] BUILD_LEVELS = new int[]{1, 2, 4, 6, 8, 10, 12, 14, 16, 18, 20, 22, 24, 26, 28, 30, 32, 35, 38, 41, 44, 47, 49};
 
     public static void main(String[] args) throws IOException {
+    	System.out.println("START");
     	HtmlBuildInfo hbi = new HtmlBuildInfo();
     	hbi.extractExecute("C:\\Data\\Docs\\hero-id\\characters\\test_char.html", CHAR_PAGE_URL);
+    	System.out.println("END");
 	}
 
     public CharacterProfile execute(String filename, String charContent) throws IOException {
@@ -56,10 +58,10 @@ public class HtmlBuildInfo {
 		String char_page_title = String.format(CHAR_TITLE,
 				name,
 				characterLevel,
-				origin,
-				primary,
-				secondary,
-				architype,
+				capitalizer(origin),
+				capitalizer(primary),
+				capitalizer(secondary),
+				capitalizer(architype),
 				alignment);
 		
 		Map<Integer, Power> powers = new HashMap<Integer, Power>();
@@ -75,12 +77,13 @@ public class HtmlBuildInfo {
 				getAlignmentIcon(iconsData, alignment),
 				name,
 				getOriginIcon(iconsData, origin)));
-		writer.write(String.format("<h2>%s LEVEL %s %s / %s %s</h2>",
+		writer.write(String.format("<h2>%s LEVEL %s %s / %s %s %s</h2>",
 				getArchitypeIcon(iconsData, architype),
 				characterLevel,
-				primary,
-				secondary,
-				architype));
+				capitalizer(primary),
+				capitalizer(secondary),
+				capitalizer(architype),
+				alignment));
 		writer.write("<div class=\"layout\">\n<h3>INHERENT POWERS</h3>");
 		writer.write(findInherentPowers(powers, boosts, iconsData));
 		writer.write("<h3>POWERS</h3>");
@@ -251,7 +254,7 @@ public class HtmlBuildInfo {
 		return result;
 	}
 	private static String outputPower(Power p) {
-		return String.format("%s %s", p.getPowerSetName(), p.getPowerName());
+		return String.format("%s - %s", capitalizer(p.getPowerSetName()), capitalizer(p.getPowerName()));
 	}
 	private static String outputBoost(Boost b) {
 		return String.format("%s %s %s",String.format("Slot %s:", b.extractSlotNumber()),
@@ -399,6 +402,23 @@ public class HtmlBuildInfo {
         }
 		return null;
 	}
+	private static String capitalizer(final String attrib){
+		String word = attrib.replace("_", " ");
+		if (word.startsWith("class ")) {
+			word = word.substring(6);
+		}
+        String[] words = word.split(" ");
+        StringBuilder sb = new StringBuilder();
+        if (words[0].length() > 0) {
+            sb.append(Character.toUpperCase(words[0].charAt(0)) + words[0].subSequence(1, words[0].length()).toString().toLowerCase());
+            for (int i = 1; i < words.length; i++) {
+                sb.append(" ");
+                sb.append(Character.toUpperCase(words[i].charAt(0)) + words[i].subSequence(1, words[i].length()).toString().toLowerCase());
+            }
+        }
+        return  sb.toString();
+
+    }
 	private static Properties getIcons() throws IOException {
 		FileReader reader = new FileReader("icons.cfg");
 		Properties p = new Properties();
