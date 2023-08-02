@@ -41,7 +41,41 @@ public class HtmlIndex {
 	private static final String MANAGE_URL = "https://www.cityofheroesrebirth.com/public/manage";
 	private static final String CHAR_PAGE_URL = "https://www.cityofheroesrebirth.com/public/api/character/raw?q=";
 	private static final String LI_CHAR = "<li title=\"%s\"><a href=\"%s.html\" target=\"charinfo\">%s %s %s (%s) %s</a></li>";
-	private static final String CHAR_DIR = "C:\\Data\\Workspace2109\\cox-character-reader\\src\\main\\characters\\%s.html";
+	//private static final String CHAR_DIR = "C:\\Data\\Workspace2109\\cox-character-reader\\src\\main\\characters\\%s.html";
+	
+	private static class CharacterFile {
+		private String characterName;
+		private String fileName;
+		private String pathFileName;
+		
+		CharacterFile(String characterName, String path) {
+			this.characterName = characterName;
+			this.fileName = parseFileName(characterName) + ".html";
+			this.pathFileName = path + "/" + this.fileName;
+		}
+		
+		public String getCharacterName() {
+			return characterName;
+		}
+		public void setCharacterName(String characterName) {
+			this.characterName = characterName;
+		}
+		public String getFileName() {
+			return fileName;
+		}
+		public void setFileName(String fileName) {
+			this.fileName = fileName;
+		}
+		public String getPathFileName() {
+			return pathFileName;
+		}
+		public void setPathFileName(String pathFileName) {
+			this.pathFileName = pathFileName;
+		}
+		public String toString() {
+			return String.format("%s %s %s", getCharacterName(), getFileName(), getPathFileName());
+		}
+	}
 
 	public static void main(String[] args) throws IOException {
 		Properties p = getConfig();
@@ -83,14 +117,18 @@ public class HtmlIndex {
 				String name = parseCharName(charContent);
 				System.out.println(name);
 				String charFileName = parseFileName(name);
+				CharacterFile cf = new CharacterFile(name, p.getProperty("character_dir"));
+				System.out.println(cf);
 				HtmlBuildInfo hbi = new HtmlBuildInfo();
-				CharacterProfile cp = hbi.execute(String.format(CHAR_DIR, charFileName), charContent);
+				//CharacterProfile cp = hbi.execute(String.format(CHAR_DIR, charFileName), charContent);
+				CharacterProfile cp = hbi.execute(cf.getPathFileName(), charContent);
 				cp.setFilename(charFileName);
 				treeMap.put(name, cp);
 			}
 		}
 		System.out.println("INDEX");
-		File file = new File(String.format(CHAR_DIR, "index"));
+		//File file = new File(String.format(CHAR_DIR, "index"));
+		File file = new File(String.format("%s/index.html", p.getProperty("character_dir")));
 		BufferedWriter writer = new BufferedWriter(new FileWriter(file,true));
 		writer.write(getHeaderHtml());
         for (Map.Entry<String, CharacterProfile> entry : treeMap.entrySet()) {
@@ -206,7 +244,8 @@ public class HtmlIndex {
 		p.load(reader);
 		if (p.getProperty("account.1.username") != null &&
 				p.getProperty("account.1.password") != null &&
-				p.getProperty("filename") != null) {
+				p.getProperty("filename") != null &&
+				p.getProperty("character_dir") != null) {
 			return p;
 		}
 		throw new IOException("Invalid Config File: Missing Parameters");
@@ -215,7 +254,7 @@ public class HtmlIndex {
 		return "<!DOCTYPE html>\n"
 				+ "<html>\n"
 				+ "<head>\n"
-				+ "<link rel=\"stylesheet\" href=\"..\\css\\build.css\" type=\"text/css\" />\n"
+				+ "<link rel=\"stylesheet\" href=\"css\\build.css\" type=\"text/css\" />\n"
 				+ "<title>Character Index</title>"
 				+ "</head>\n"
 				+ "<body>\n"

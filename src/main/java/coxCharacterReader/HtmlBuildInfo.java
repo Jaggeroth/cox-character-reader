@@ -20,12 +20,14 @@ import org.apache.http.impl.client.HttpClientBuilder;
 import org.apache.http.util.EntityUtils;
 
 public class HtmlBuildInfo {
-	private static final String IMG_TAG = "<img src=\"..\\%s\" title=\"%s\" width=\"32\" height=\"32\">";
+	private static final String IMG_TAG = "<img src=\"%s\" title=\"%s\" width=\"32\" height=\"32\">";
 	private static final String TB_POWER = "<table class=\"powertable\">";
 	private static final String TB_POWER_ROW = "<tr><td class=\"powercol\" rowspan=\"2\">%s</td><td colspan=\"7\">%s</td></tr>";
 	private static final String TB_ENHANCEMENT_CELL = "<td style=\"width: 36px;\">%s</td>";
 	private static final String UNKNOWN_ICON = "images\\unknown.png";
-	private static final String CHAR_TITLE = "Level %s %s / %s %s %s %s : %s";
+	//private static final String CHAR_TITLE = "Level %s %s / %s %s %s %s : %s";
+	// Power Jenny : lvl 50 Magic Invulnerability / Super Strength Tanker Hero
+	private static final String CHAR_TITLE = "%s : lvl %s %s %s / %s %s %s";
     //private static final String CHAR_PAGE_URL = "https://www.cityofheroesrebirth.com/public/api/character/raw?q=<character id here>";
 	// Enigma Tick
 	private static final String CHAR_PAGE_URL = "https://www.cityofheroesrebirth.com/public/api/character/raw?q=7TuqbPdjm0h8KH6nOf8olA%3D%3D";
@@ -34,7 +36,7 @@ public class HtmlBuildInfo {
 
     public static void main(String[] args) throws IOException {
     	HtmlBuildInfo hbi = new HtmlBuildInfo();
-    	hbi.extractExecute("C:\\Data\\Workspace2109\\cox-character-reader\\src\\main\\characters\\enigma_tick.html", CHAR_PAGE_URL);
+    	hbi.extractExecute("C:\\Data\\Docs\\hero-id\\characters\\enigma_tick.html", CHAR_PAGE_URL);
 	}
 
     public CharacterProfile execute(String filename, String charContent) throws IOException {
@@ -52,14 +54,15 @@ public class HtmlBuildInfo {
 		} catch (NumberFormatException e) {
 			// do nothing happens when char has not been played
 		}
+		// Power Jenny : lvl 50 Magic Invulnerability / Super Strength Tanker Hero
 		String char_page_title = String.format(CHAR_TITLE,
+				name,
 				characterLevel,
+				origin,
 				primary,
 				secondary,
-				origin,
-				alignment,
 				architype,
-				name);
+				alignment);
 		
 		Map<Integer, Power> powers = new HashMap<Integer, Power>();
 		powers = parsePowers(charContent, primary, secondary);
@@ -243,7 +246,7 @@ public class HtmlBuildInfo {
 		}
 		while (c<7) {
 			result = result + "<td style=\"width: 32px, height: 32px;\">" + 
-		        "<img src=\"..\\images\\blank.png\" title=\"Kick\" width=\"32\" height=\"32\">" + 
+		        "<img src=\"images\\blank.png\" title=\"Kick\" width=\"32\" height=\"32\">" + 
 			    "</td>";
 			c++;
 		}
@@ -411,7 +414,7 @@ public class HtmlBuildInfo {
 		return "<!DOCTYPE html>\n"
 				+ "<html>\n"
 				+ "<head>\n"
-				+ "<link rel=\"stylesheet\" href=\"..\\css\\build.css\" type=\"text/css\" />\n"
+				+ "<link rel=\"stylesheet\" href=\"css\\build.css\" type=\"text/css\" />\n"
 				+ "<title>" + title + "</title>\n"
 				+ "</head>"
 				+ "<body>";	
