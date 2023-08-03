@@ -380,6 +380,26 @@ public class HtmlBuildInfo {
 		String src = UNKNOWN_ICON;
 		if (i.getProperty(key) != null) {
 			src = i.getProperty(key);
+		} else if (b.getBoostName().toLowerCase().startsWith("mutation_magic_")) {
+			src = "images\\enhancement\\do\\mutation_magic_unknown.png";
+		} else if (b.getBoostName().toLowerCase().startsWith("mutation_science_")) {
+			src = "images\\enhancement\\do\\mutation_science_unknown.png";
+		} else if (b.getBoostName().toLowerCase().startsWith("natural_magic_")) {
+			src = "images\\enhancement\\do\\natural_magic_unknown.png";
+		} else if (b.getBoostName().toLowerCase().startsWith("technology_natural_")) {
+			src = "images\\enhancement\\do\\technology_natural_unknown.png";
+		} else if (b.getBoostName().toLowerCase().startsWith("technology_science_")) {
+			src = "images\\enhancement\\do\\technology_science_unknown.png";
+		} else if (b.getBoostName().toLowerCase().startsWith("magic_")) {
+			src = "images\\enhancement\\so\\magic_unknown.png";
+		} else if (b.getBoostName().toLowerCase().startsWith("natural_")) {
+			src = "images\\enhancement\\so\\natural_unknown.png";
+		} else if (b.getBoostName().toLowerCase().startsWith("technology_")) {
+			src = "images\\enhancement\\so\\technology_unknown.png";
+		} else if (b.getBoostName().toLowerCase().startsWith("science_")) {
+			src = "images\\enhancement\\so\\science_unknown.png";
+		} else if (b.getBoostName().toLowerCase().startsWith("mutation_")) {
+			src = "images\\enhancement\\so\\mutation_unknown.png";
 		}
 		String hoverText = b.getBoostName() + (b.getLevel() != null ? " LVL "+b.getLevel() : "");
 		return String.format(IMG_TAG, src, hoverText);

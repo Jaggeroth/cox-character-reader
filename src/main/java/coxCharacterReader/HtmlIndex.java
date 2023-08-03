@@ -80,6 +80,7 @@ public class HtmlIndex {
 		Properties p = getConfig();
 		Map<String, CharacterProfile> treeMap = new TreeMap<String, CharacterProfile>();
 		System.out.println("START");
+		System.out.println(String.format("Writing to %s", p.getProperty("character_dir")));
 		for (RebirthAccount account : getAccounts(p)) {
 	        CookieStore cookieStore = new BasicCookieStore();
 	        HttpClientContext  localContext = HttpClientContext.create();
