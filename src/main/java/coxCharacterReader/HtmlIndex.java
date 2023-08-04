@@ -56,20 +56,11 @@ public class HtmlIndex {
 		public String getCharacterName() {
 			return characterName;
 		}
-		public void setCharacterName(String characterName) {
-			this.characterName = characterName;
-		}
 		public String getFileName() {
 			return fileName;
 		}
-		public void setFileName(String fileName) {
-			this.fileName = fileName;
-		}
 		public String getPathFileName() {
 			return pathFileName;
-		}
-		public void setPathFileName(String pathFileName) {
-			this.pathFileName = pathFileName;
 		}
 		public String toString() {
 			return String.format("%s %s %s", getCharacterName(), getFileName(), getPathFileName());

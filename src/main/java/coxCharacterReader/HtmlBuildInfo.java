@@ -31,11 +31,15 @@ public class HtmlBuildInfo {
 	private static final String CHAR_TITLE = "%s : lvl %s %s %s / %s %s %s";
     //private static final String CHAR_PAGE_URL = "https://www.cityofheroesrebirth.com/public/api/character/raw?q=<character id here>";
 	// Enigma Tick
-	private static final String CHAR_PAGE_URL = "https://www.cityofheroesrebirth.com/public/api/character/raw?q=BJGfUO9DTCFxoEE7okniNQ%3D%3D";
+	//private static final String CHAR_PAGE_URL = "https://www.cityofheroesrebirth.com/public/api/character/raw?q=BJGfUO9DTCFxoEE7okniNQ%3D%3D";
+	// Maiden America
+	private static final String CHAR_PAGE_URL = "https://www.cityofheroesrebirth.com/public/api/character/raw?q=BYzK5AI%2B8UUygO4bER12GQ%3D%3D";
     
     public static final int[] BUILD_LEVELS = new int[]{1, 2, 4, 6, 8, 10, 12, 14, 16, 18, 20, 22, 24, 26, 28, 30, 32, 35, 38, 41, 44, 47, 49};
+    private Properties iconData;
+    private Properties substitutionData;
 
-    public static void main(String[] args) throws IOException {
+	public static void main(String[] args) throws IOException {
     	System.out.println("START");
     	HtmlBuildInfo hbi = new HtmlBuildInfo();
     	hbi.extractExecute("C:\\Data\\Docs\\hero-id\\characters\\test_char.html", CHAR_PAGE_URL);
@@ -43,7 +47,6 @@ public class HtmlBuildInfo {
 	}
 
     public CharacterProfile execute(String filename, String charContent) throws IOException {
-    	Properties iconsData = getIcons();
 		Map<String, String> attribs = parseCharacterAttribs(charContent);
 		String alignment = parseAlignment(charContent);
 		String origin = attribs.get("Origin");
@@ -77,23 +80,22 @@ public class HtmlBuildInfo {
 		
 		writer.write(getHeaderHtml(char_page_title));
 		writer.write(String.format("<h1>%s %s %s</h1>",
-				getAlignmentIcon(iconsData, alignment),
+				getAlignmentIcon(alignment),
 				name,
-				getOriginIcon(iconsData, origin)));
+				getOriginIcon(getIconData(), origin)));
 		writer.write(String.format("<h2>%s LEVEL %s %s / %s %s %s</h2>",
-				getArchitypeIcon(iconsData, architype),
+				getArchitypeIcon(getIconData(), architype),
 				characterLevel,
 				capitalizer(primary),
 				capitalizer(secondary),
 				capitalizer(architype),
 				alignment));
 		writer.write("<div class=\"layout\">\n<h3>INHERENT POWERS</h3>");
-		writer.write(findInherentPowers(powers, boosts, iconsData));
+		writer.write(findInherentPowers(powers, boosts));
 		writer.write("<h3>POWERS</h3>");
 		for (int buildLevel : BUILD_LEVELS) {
 			if (buildLevel <= characterLevel) {
-				//System.out.println(String.format("<h3>LEVEL %s</h3>", buildLevel));
-				writer.write(findPower(buildLevel,powers, boosts, iconsData));
+				writer.write(findPower(buildLevel,powers, boosts));
 			}
 		}
 		/***
@@ -158,10 +160,10 @@ public class HtmlBuildInfo {
 		}
 		writer.write(getFooterHtml());
 		writer.close();
-		return new CharacterProfile(name, getArchitypeIcon(iconsData, architype),
-				getAlignmentIcon(iconsData, alignment),
+		return new CharacterProfile(name, getArchitypeIcon(getIconData(), architype),
+				getAlignmentIcon(alignment),
 				characterLevel,
-				getOriginIcon(iconsData, origin),
+				getOriginIcon(getIconData(), origin),
 				primary,
 				secondary,
 				filename,
@@ -216,35 +218,33 @@ public class HtmlBuildInfo {
 		}
 		return boosts;
 	}
-	private static String findPower(int forLevel, 
+	private String findPower(int forLevel, 
 			final Map<Integer, Power> powers, 
-			final Map<Integer, Boost> boosts,
-			final Properties iconsData) {
+			final Map<Integer, Boost> boosts) {
 		String result = "";
 		for (Map.Entry<Integer, Power> entry : powers.entrySet()) {
 			Power p = entry.getValue();
 			if (Integer.valueOf(p.extractPowerLevelBought()).compareTo(forLevel)==0) {
 				if (p.isBuildOption()) {
 					result = result + TB_POWER;
-					result = result + String.format(TB_POWER_ROW, getPowerIcon(iconsData, p), 
+					result = result + String.format(TB_POWER_ROW, getPowerIcon(p), 
 							String.format("(%s) ", String.valueOf(forLevel))+outputPower(p));
 					result = result + "<tr>\n";
-					result = result + findBoostForPower(p, boosts, iconsData);
+					result = result + findBoostForPower(p, boosts);
 					result = result + "</tr>\n<table>\n";
 				}
 			}
 		}
 		return result;
 	}
-	private static String findBoostForPower(Power p, 
-			final Map<Integer, Boost> boosts,
-			final Properties iconsData) {
+	private String findBoostForPower(Power p, 
+			final Map<Integer, Boost> boosts) {
 		String result = "";
 		int c=0;
 		for (Map.Entry<Integer, Boost> entry : boosts.entrySet()) {
 			Boost b = entry.getValue();
 			if (p.getPowerId().equals(b.getPowerId())) {
-				result = result + (String.format(TB_ENHANCEMENT_CELL, getBoostIcon(iconsData, b))); //, outputBoost(b, p)
+				result = result + (String.format(TB_ENHANCEMENT_CELL, getBoostIcon(b))); //, outputBoost(b, p)
 				c++;
 			}
 		}
@@ -256,7 +256,7 @@ public class HtmlBuildInfo {
 		}
 		return result;
 	}
-	private static String outputPower(Power p) {
+	private String outputPower(Power p) {
 		return String.format("%s - %s", capitalizer(p.getPowerSetName()), capitalizer(p.getPowerName()));
 	}
 	private static String outputBoost(Boost b) {
@@ -279,16 +279,16 @@ public class HtmlBuildInfo {
 	 * @param powers - map of powers
 	 * @param boosts - map of enhancement slotting
 	 ***/
-	private static String findInherentPowers(final Map<Integer, Power> powers, final Map<Integer, Boost> boosts, final Properties iconsData) {
+	private String findInherentPowers(final Map<Integer, Power> powers, final Map<Integer, Boost> boosts) {
 		String result = "";
 		for (Map.Entry<Integer, Power> entry : powers.entrySet()) {
 			Power p = entry.getValue();
 			if ("inherent".equalsIgnoreCase(p.getCategoryName())) {
 				if (isSlotted(p.getPowerId(), boosts)) {
 					result = result + TB_POWER + "\n";
-					result = result + String.format(TB_POWER_ROW,  getPowerIcon(iconsData, p), outputPower(p));
+					result = result + String.format(TB_POWER_ROW,  getPowerIcon(p), outputPower(p));
 					result = result + "<tr>\n";
-					result = result + findBoostForPower(p, boosts, iconsData);
+					result = result + findBoostForPower(p, boosts);
 					result = result + "</tr>\n</table>\n";
 				}
 			}
@@ -355,9 +355,9 @@ public class HtmlBuildInfo {
 		}
 		return null;
 	}
-	private static String getAlignmentIcon(Properties i, final String a) {
+	private String getAlignmentIcon(final String a) {
 		String key = String.format("alignment.%s", a.toLowerCase());
-		String src = i.getProperty(key);
+		String src = getIconData().getProperty(key);
 		return String.format(IMG_TAG, src, a);
 	}
 	private static String getArchitypeIcon(Properties i, final String a) {
@@ -370,43 +370,39 @@ public class HtmlBuildInfo {
 		String src = i.getProperty(key);
 		return String.format(IMG_TAG, src, origin);
 	}
-	private static String getPowerIcon(Properties i, final Power p) {
+	private String getPowerIcon(final Power p) {
 		String key = String.format("power.%s.%s", p.getPowerSetName().toLowerCase(), p.getPowerName().toLowerCase());
 		String src = UNKNOWN_ICON;
-		if (i.getProperty(key) != null) {
-			src = i.getProperty(key);
+		if (getIconData().getProperty(key) != null) {
+			src = getIconData().getProperty(key);
 		}
-		return String.format(IMG_TAG, src, p.getPowerName());
+		return String.format(IMG_TAG, src, capitalizer(p.getPowerName()));
 	}
-	private static String getBoostIcon(Properties i, final Boost b) {
+	private String getBoostIcon(final Boost b) {
 		String key = getIconKey(b.getBoostName());
 		String src = UNKNOWN_ICON;
-		if (i.getProperty(key) != null) {
-			src = i.getProperty(key);
+		if (getIconData().getProperty(key) != null) {
+			src = getIconData().getProperty(key);
 		} else {
-			return getCompositeIcon(i, b);
+			return getCompositeIcon(b);
 		}
-		String hoverText = b.getBoostName() + (b.getLevel() != null ? " LVL "+b.getLevel() : "");
+		String hoverText = capitalizer(b.getBoostName()) + (b.getLevel() != null ? " LVL "+b.getLevel() : "");
 		return String.format(IMG_TAG, src, hoverText);
 	}
-	private static String getCompositeIcon(Properties i, final Boost b) {
+	private String getCompositeIcon(final Boost b) {
 		List<String> valid = Arrays.asList("magic","natural","technology","science","mutation");
 		String hoverText = b.getBoostName() + (b.getLevel() != null ? " LVL "+b.getLevel() : "");
 		String boostName = b.getBoostName().toLowerCase();
-		//int indx = boostName.lastIndexOf("_");
-		//int count = boostName.length() - boostName.replace("_", "").length();
 		String [] element = boostName.split("_");
 		if (valid.contains(element[0])) {
 			if (valid.contains(element[1])) {
-				System.out.println(String.format("%s is dual origin", boostName));
 				String basekey = String.format("enhancement.generic_%s", String.join("_", Arrays.copyOfRange(element, 2, element.length)));
 				String ringkey = String.format("enhancement.ring_%s_%s", element[0], element[1]);
-				return String.format(DOUBLE_IMG, i.getProperty(basekey), i.getProperty(ringkey), hoverText);
+				return String.format(DOUBLE_IMG, getIconData().getProperty(basekey), getIconData().getProperty(ringkey), hoverText);
 			} else {
-				System.out.println(String.format("%s is single origin", boostName));
 				String basekey = String.format("enhancement.generic_%s", String.join("_", Arrays.copyOfRange(element, 1, element.length)));
 				String ringkey = String.format("enhancement.ring_%s", element[0]);
-				return String.format(DOUBLE_IMG, i.getProperty(basekey), i.getProperty(ringkey), hoverText);
+				return String.format(DOUBLE_IMG, getIconData().getProperty(basekey), getIconData().getProperty(ringkey), hoverText);
 			}
 		}
 		return String.format(IMG_TAG, UNKNOWN_ICON, hoverText);
@@ -430,7 +426,14 @@ public class HtmlBuildInfo {
         }
 		return null;
 	}
-	private static String capitalizer(final String attrib){
+	private String capitalizer(final String attrib) {
+		if (getSubstitutionData() != null) {
+			System.out.println("Looking up: " + attrib);
+			String result = getSubstitutionData().getProperty(attrib);
+			if (result != null) {
+				return result;
+			}
+		}
 		String word = attrib.replace("_", " ");
 		if (word.startsWith("class ")) {
 			word = word.substring(6);
@@ -445,16 +448,32 @@ public class HtmlBuildInfo {
             }
         }
         return  sb.toString();
-
     }
-	private static Properties getIcons() throws IOException {
-		FileReader reader = new FileReader("icons.cfg");
-		Properties p = new Properties();
-		p.load(reader);
-		if (p.getProperty("alignment.hero") != null) {
-			return p;
+	private Properties getIconData() {
+		if (iconData == null) {
+			try {
+				FileReader reader = new FileReader("icons.cfg");
+				Properties p = new Properties();
+				p.load(reader);
+				iconData = p;
+			} catch (IOException e) {
+				return null;
+			}
 		}
-		throw new IOException("Invalid Config File: Missing Parameters");
+		return iconData;
+	}
+	private Properties getSubstitutionData() {
+		if (substitutionData == null) {
+			try {
+				FileReader reader = new FileReader("textSubstitution.cfg");
+				Properties p = new Properties();
+				p.load(reader);
+				substitutionData = p;
+			} catch (IOException e) {
+				return null;
+			}
+		}
+		return substitutionData;
 	}
 	private static String getHeaderHtml(String title) {
 		return "<!DOCTYPE html>\n"
