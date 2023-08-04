@@ -60,6 +60,15 @@ a:active {
   vertical-align: top;
 }
 
+.img-container { position: relative; }
+
+.img-container .top {
+  position: absolute;
+  top: 0;
+  left: 0;
+  z-index: 1;
+}
+
 @media only screen and (max-width: 820px) {
   .layout {
     column-count: 1;

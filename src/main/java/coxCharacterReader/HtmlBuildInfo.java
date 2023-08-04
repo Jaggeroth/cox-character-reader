@@ -5,7 +5,9 @@ import java.io.File;
 import java.io.FileReader;
 import java.io.FileWriter;
 import java.io.IOException;
+import java.util.Arrays;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.Properties;
 import java.util.Scanner;
@@ -25,10 +27,11 @@ public class HtmlBuildInfo {
 	private static final String TB_POWER_ROW = "<tr><td class=\"powercol\" rowspan=\"2\">%s</td><td colspan=\"7\">%s</td></tr>";
 	private static final String TB_ENHANCEMENT_CELL = "<td style=\"width: 36px;\">%s</td>";
 	private static final String UNKNOWN_ICON = "images\\unknown.png";
+	private static final String DOUBLE_IMG = "<div class=\"img-container\"><img class=\"bottom\" src=\"%s\" width=\"32\" height=\"32\"><img class=\"top\" src=\"%s\" title=\"%s\" width=\"32\" height=\"32\"></div>";
 	private static final String CHAR_TITLE = "%s : lvl %s %s %s / %s %s %s";
     //private static final String CHAR_PAGE_URL = "https://www.cityofheroesrebirth.com/public/api/character/raw?q=<character id here>";
 	// Enigma Tick
-	private static final String CHAR_PAGE_URL = "https://www.cityofheroesrebirth.com/public/api/character/raw?q=7TuqbPdjm0h8KH6nOf8olA%3D%3D";
+	private static final String CHAR_PAGE_URL = "https://www.cityofheroesrebirth.com/public/api/character/raw?q=BJGfUO9DTCFxoEE7okniNQ%3D%3D";
     
     public static final int[] BUILD_LEVELS = new int[]{1, 2, 4, 6, 8, 10, 12, 14, 16, 18, 20, 22, 24, 26, 28, 30, 32, 35, 38, 41, 44, 47, 49};
 
@@ -380,29 +383,34 @@ public class HtmlBuildInfo {
 		String src = UNKNOWN_ICON;
 		if (i.getProperty(key) != null) {
 			src = i.getProperty(key);
-		} else if (b.getBoostName().toLowerCase().startsWith("mutation_magic_")) {
-			src = "images\\enhancement\\do\\mutation_magic_unknown.png";
-		} else if (b.getBoostName().toLowerCase().startsWith("mutation_science_")) {
-			src = "images\\enhancement\\do\\mutation_science_unknown.png";
-		} else if (b.getBoostName().toLowerCase().startsWith("natural_magic_")) {
-			src = "images\\enhancement\\do\\natural_magic_unknown.png";
-		} else if (b.getBoostName().toLowerCase().startsWith("technology_natural_")) {
-			src = "images\\enhancement\\do\\technology_natural_unknown.png";
-		} else if (b.getBoostName().toLowerCase().startsWith("technology_science_")) {
-			src = "images\\enhancement\\do\\technology_science_unknown.png";
-		} else if (b.getBoostName().toLowerCase().startsWith("magic_")) {
-			src = "images\\enhancement\\so\\magic_unknown.png";
-		} else if (b.getBoostName().toLowerCase().startsWith("natural_")) {
-			src = "images\\enhancement\\so\\natural_unknown.png";
-		} else if (b.getBoostName().toLowerCase().startsWith("technology_")) {
-			src = "images\\enhancement\\so\\technology_unknown.png";
-		} else if (b.getBoostName().toLowerCase().startsWith("science_")) {
-			src = "images\\enhancement\\so\\science_unknown.png";
-		} else if (b.getBoostName().toLowerCase().startsWith("mutation_")) {
-			src = "images\\enhancement\\so\\mutation_unknown.png";
+		} else {
+			return getCompositeIcon(i, b);
 		}
 		String hoverText = b.getBoostName() + (b.getLevel() != null ? " LVL "+b.getLevel() : "");
 		return String.format(IMG_TAG, src, hoverText);
+	}
+	private static String getCompositeIcon(Properties i, final Boost b) {
+		List<String> valid = Arrays.asList("magic","natural","technology","science","mutation");
+		String hoverText = b.getBoostName() + (b.getLevel() != null ? " LVL "+b.getLevel() : "");
+		String boostName = b.getBoostName().toLowerCase();
+		//int indx = boostName.lastIndexOf("_");
+		//int count = boostName.length() - boostName.replace("_", "").length();
+		String [] element = boostName.split("_");
+		if (valid.contains(element[0])) {
+			if (valid.contains(element[1])) {
+				System.out.println(String.format("%s is dual origin", boostName));
+				String basekey = String.format("enhancement.generic_%s", String.join("_", Arrays.copyOfRange(element, 2, element.length)));
+				String ringkey = String.format("enhancement.ring_%s_%s", element[0], element[1]);
+				return String.format(DOUBLE_IMG, i.getProperty(basekey), i.getProperty(ringkey), hoverText);
+			} else {
+				System.out.println(String.format("%s is single origin", boostName));
+				String basekey = String.format("enhancement.generic_%s", String.join("_", Arrays.copyOfRange(element, 1, element.length)));
+				String ringkey = String.format("enhancement.ring_%s", element[0]);
+				return String.format(DOUBLE_IMG, i.getProperty(basekey), i.getProperty(ringkey), hoverText);
+			}
+		}
+		return String.format(IMG_TAG, UNKNOWN_ICON, hoverText);
+		
 	}
 	private static String getIconKey(final String boostName) {
 		String key = boostName.toLowerCase();
