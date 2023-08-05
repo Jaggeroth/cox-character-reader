@@ -33,7 +33,9 @@ public class HtmlBuildInfo {
 	// Enigma Tick
 	//private static final String CHAR_PAGE_URL = "https://www.cityofheroesrebirth.com/public/api/character/raw?q=BJGfUO9DTCFxoEE7okniNQ%3D%3D";
 	// Maiden America
-	private static final String CHAR_PAGE_URL = "https://www.cityofheroesrebirth.com/public/api/character/raw?q=BYzK5AI%2B8UUygO4bER12GQ%3D%3D";
+	//private static final String CHAR_PAGE_URL = "https://www.cityofheroesrebirth.com/public/api/character/raw?q=BYzK5AI%2B8UUygO4bER12GQ%3D%3D";
+	// Murder Muse
+	private static final String CHAR_PAGE_URL = "https://www.cityofheroesrebirth.com/public/api/character/raw?q=mQ2Wzt57EOHCQ1H55Eex0w%3D%3D";
     
     public static final int[] BUILD_LEVELS = new int[]{1, 2, 4, 6, 8, 10, 12, 14, 16, 18, 20, 22, 24, 26, 28, 30, 32, 35, 38, 41, 44, 47, 49};
     private Properties iconData;
@@ -257,7 +259,7 @@ public class HtmlBuildInfo {
 		return result;
 	}
 	private String outputPower(Power p) {
-		return String.format("%s - %s", capitalizer(p.getPowerSetName()), capitalizer(p.getPowerName()));
+		return String.format("%s - %s", capitalizer(p.getPowerSetName()), capitalizer(p));
 	}
 	private static String outputBoost(Boost b) {
 		return String.format("%s %s %s",String.format("Slot %s:", b.extractSlotNumber()),
@@ -375,8 +377,10 @@ public class HtmlBuildInfo {
 		String src = UNKNOWN_ICON;
 		if (getIconData().getProperty(key) != null) {
 			src = getIconData().getProperty(key);
+		} else {
+			System.out.println(String.format("POWER NOT FOUND: %s - %s", p.getPowerSetName(), p.getPowerName()));
 		}
-		return String.format(IMG_TAG, src, capitalizer(p.getPowerName()));
+		return String.format(IMG_TAG, src, capitalizer(p));
 	}
 	private String getBoostIcon(final Boost b) {
 		String key = getIconKey(b.getBoostName());
@@ -405,6 +409,7 @@ public class HtmlBuildInfo {
 				return String.format(DOUBLE_IMG, getIconData().getProperty(basekey), getIconData().getProperty(ringkey), hoverText);
 			}
 		}
+		System.out.println(String.format("ENHANCEMENT NOT FOUND: %s", b.getBoostName()));
 		return String.format(IMG_TAG, UNKNOWN_ICON, hoverText);
 		
 	}
@@ -426,10 +431,24 @@ public class HtmlBuildInfo {
         }
 		return null;
 	}
+	/**
+	 * This version of capitalizer takes a power and returns a proper form of the powername only.
+	 * @param Power pow
+	 * @return String of the proper power name.
+	 */
+	private String capitalizer(final Power pow) {
+		if (getSubstitutionData() != null) {
+			String key = String.format("%s.%s", pow.getPowerSetName().toLowerCase(), pow.getPowerName().toLowerCase());
+			String result = getSubstitutionData().getProperty(key);
+			if (result != null) {
+				return result;
+			}
+		}
+		return capitalizer(pow.getPowerName());
+	}
 	private String capitalizer(final String attrib) {
 		if (getSubstitutionData() != null) {
-			System.out.println("Looking up: " + attrib);
-			String result = getSubstitutionData().getProperty(attrib);
+			String result = getSubstitutionData().getProperty(attrib.toLowerCase());
 			if (result != null) {
 				return result;
 			}
