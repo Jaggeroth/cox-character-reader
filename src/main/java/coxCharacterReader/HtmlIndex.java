@@ -52,7 +52,6 @@ public class HtmlIndex {
 			this.fileName = parseFileName(characterName) + ".html";
 			this.pathFileName = path + "/" + this.fileName;
 		}
-		
 		public String getCharacterName() {
 			return characterName;
 		}

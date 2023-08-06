@@ -5,6 +5,9 @@ import java.io.File;
 import java.io.FileReader;
 import java.io.FileWriter;
 import java.io.IOException;
+import java.io.InputStream;
+import java.net.URISyntaxException;
+import java.net.URL;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
@@ -471,9 +474,9 @@ public class HtmlBuildInfo {
 	private Properties getIconData() {
 		if (iconData == null) {
 			try {
-				FileReader reader = new FileReader("icons.cfg");
+				InputStream inputStream = getClass().getResourceAsStream("/icons.cfg");
 				Properties p = new Properties();
-				p.load(reader);
+				p.load(inputStream);
 				iconData = p;
 			} catch (IOException e) {
 				return null;
@@ -484,9 +487,9 @@ public class HtmlBuildInfo {
 	private Properties getSubstitutionData() {
 		if (substitutionData == null) {
 			try {
-				FileReader reader = new FileReader("textSubstitution.cfg");
+				InputStream inputStream = getClass().getResourceAsStream("/textSubstitution.cfg");
 				Properties p = new Properties();
-				p.load(reader);
+				p.load(inputStream);
 				substitutionData = p;
 			} catch (IOException e) {
 				return null;
