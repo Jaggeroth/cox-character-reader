@@ -1,0 +1,5 @@
+target/
+.settings/
+src/main/characters/adam_bomb.html
+src/main/characters/
+stdjre/
