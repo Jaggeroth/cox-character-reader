@@ -8,6 +8,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.net.URISyntaxException;
 import java.net.URL;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
@@ -17,6 +18,7 @@ import java.util.Scanner;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
+import org.apache.commons.io.FileUtils;
 import org.apache.http.HttpEntity;
 import org.apache.http.HttpResponse;
 import org.apache.http.client.HttpClient;
@@ -43,15 +45,17 @@ public class HtmlBuildInfo {
     public static final int[] BUILD_LEVELS = new int[]{1, 2, 4, 6, 8, 10, 12, 14, 16, 18, 20, 22, 24, 26, 28, 30, 32, 35, 38, 41, 44, 47, 49};
     private Properties iconData;
     private Properties substitutionData;
+    private List<String> resources;
 
 	public static void main(String[] args) throws IOException {
     	System.out.println("START");
     	HtmlBuildInfo hbi = new HtmlBuildInfo();
-    	hbi.extractExecute("C:\\Data\\Docs\\hero-id\\characters\\test_char.html", CHAR_PAGE_URL);
+    	hbi.extractExecute("C:\\Data\\Docs\\hero-id\\characters", "test_char", CHAR_PAGE_URL);
     	System.out.println("END");
 	}
 
-    public CharacterProfile execute(String filename, String charContent) throws IOException {
+    public CharacterProfile execute(String targetDir, String targetFilename, String charContent) throws IOException {
+    	String filename = String.format("%s\\%s.html", targetDir, targetFilename);
 		Map<String, String> attribs = parseCharacterAttribs(charContent);
 		String alignment = parseAlignment(charContent);
 		String origin = attribs.get("Origin");
@@ -165,6 +169,7 @@ public class HtmlBuildInfo {
 		}
 		writer.write(getFooterHtml());
 		writer.close();
+		deployResources(getResources(), targetDir);
 		return new CharacterProfile(name, getArchitypeIcon(architype),
 				getAlignmentIcon(alignment),
 				characterLevel,
@@ -175,14 +180,14 @@ public class HtmlBuildInfo {
 				char_page_title);
     }
  
-    public CharacterProfile extractExecute(String filename, String characterUrl) throws IOException {
+    public CharacterProfile extractExecute(String targetDir, String targetFilename, String characterUrl) throws IOException {
 		HttpClient client = HttpClientBuilder.create().build();
 		HttpGet request = new HttpGet(characterUrl);
 		request.addHeader("User-Agent", "Apache HTTPClient");
 		HttpResponse response = client.execute(request);
 		HttpEntity entity = response.getEntity();
 		String charContent = EntityUtils.toString(entity);
-		return execute(filename, charContent);
+		return execute(targetDir, targetFilename, charContent);
     }
 
     private static Map<Integer, Power> parsePowers(String content, String primary, String secondary) {
@@ -406,7 +411,7 @@ public class HtmlBuildInfo {
 			}
 		}
 		System.out.println(String.format("ENHANCEMENT NOT FOUND: %s", b.getBoostName()));
-		System.out.println(String.format("RESOURCE: %s", UNKNOWN_ICON));
+		resourceAdd(UNKNOWN_ICON);
 		return String.format(IMG_TAG, UNKNOWN_ICON, hoverText);
 		
 	}
@@ -478,6 +483,7 @@ public class HtmlBuildInfo {
 		}
 		return iconData;
 	}
+	
 	/**
 	 * Used in all cases to retrieve icon path to ensure file is copied to target directory
 	 * @param attrib
@@ -488,7 +494,7 @@ public class HtmlBuildInfo {
 		if (result == null ) {
 			result = UNKNOWN_ICON;
 		}
-		System.out.println(String.format("RESOURCE: %s", result));
+		resourceAdd(result);
 		return result;
 	}
 	private String getIconProperty(Power p) {
@@ -498,7 +504,7 @@ public class HtmlBuildInfo {
 			result = UNKNOWN_ICON;
 			System.out.println(String.format("POWER NOT FOUND: %s - %s", p.getPowerSetName(), p.getPowerName()));
 		}
-		System.out.println(String.format("RESOURCE: %s", result));
+		resourceAdd(result);
 		return result;
 	}
 	private Properties getSubstitutionData() {
@@ -528,5 +534,38 @@ public class HtmlBuildInfo {
 				+ "</body>\n"
 				+ "</html>\n"
 				+ "";
+	}
+
+	private List<String> getResources() {
+		return resources;
+	}
+	
+	private void resourceAdd(String resource) {
+		if (resources == null) {
+			resources = new ArrayList<String>();
+			resources.add("css\\build.css");
+			resources.add("images\\blank.png");
+			resources.add("images\\power_bar.png");
+		}
+		if (!resources.contains(resource)) {
+			resources.add(resource);
+		}
+	}
+	private void deployResources(List<String> resources, String targetDir) {
+		for (String resource : resources) {
+			String toFilePath = String.format("%s\\%s", targetDir, resource);
+			URL url = getClass().getResource(String.format("/%s", resource.replace("\\", "/")));
+		    File sourceFile = new File(url.getPath());
+		    File targetFile = new File(toFilePath);
+		    if (!targetFile.exists()) {
+		    	targetFile.getParentFile().mkdirs();
+		    	try {
+		    		FileUtils.copyFile(sourceFile, targetFile);
+		    	} catch (IOException e) {
+		    		// TODO Auto-generated catch block
+		    		e.printStackTrace();
+		    	}
+		    }
+		}
 	}
 }
