@@ -87,9 +87,9 @@ public class HtmlBuildInfo {
 		writer.write(String.format("<h1>%s %s %s</h1>",
 				getAlignmentIcon(alignment),
 				name,
-				getOriginIcon(getIconData(), origin)));
+				getOriginIcon(origin)));
 		writer.write(String.format("<h2>%s LEVEL %s %s / %s %s %s</h2>",
-				getArchitypeIcon(getIconData(), architype),
+				getArchitypeIcon(architype),
 				characterLevel,
 				capitalizer(primary),
 				capitalizer(secondary),
@@ -165,10 +165,10 @@ public class HtmlBuildInfo {
 		}
 		writer.write(getFooterHtml());
 		writer.close();
-		return new CharacterProfile(name, getArchitypeIcon(getIconData(), architype),
+		return new CharacterProfile(name, getArchitypeIcon(architype),
 				getAlignmentIcon(alignment),
 				characterLevel,
-				getOriginIcon(getIconData(), origin),
+				getOriginIcon(origin),
 				primary,
 				secondary,
 				filename,
@@ -362,39 +362,32 @@ public class HtmlBuildInfo {
 	}
 	private String getAlignmentIcon(final String a) {
 		String key = String.format("alignment.%s", a.toLowerCase());
-		String src = getIconData().getProperty(key);
+		String src = getIconProperty(key);
 		return String.format(IMG_TAG, src, a);
 	}
-	private static String getArchitypeIcon(Properties i, final String a) {
+	private String getArchitypeIcon(final String a) {
 		String key = String.format("archetype.%s", a.toLowerCase());
-		String src = i.getProperty(key);
+		String src = getIconProperty(key);
 		return String.format(IMG_TAG, src, a);
 	}
-	private static String getOriginIcon(Properties i, final String origin) {
+	private String getOriginIcon(final String origin) {
 		String key = String.format("origin.%s", origin.toLowerCase());
-		String src = i.getProperty(key);
+		String src = getIconProperty(key);
 		return String.format(IMG_TAG, src, origin);
 	}
 	private String getPowerIcon(final Power p) {
-		String key = String.format("power.%s.%s", p.getPowerSetName().toLowerCase(), p.getPowerName().toLowerCase());
-		String src = UNKNOWN_ICON;
-		if (getIconData().getProperty(key) != null) {
-			src = getIconData().getProperty(key);
-		} else {
-			System.out.println(String.format("POWER NOT FOUND: %s - %s", p.getPowerSetName(), p.getPowerName()));
-		}
+		String src = getIconProperty(p);
 		return String.format(IMG_TAG, src, capitalizer(p));
 	}
 	private String getBoostIcon(final Boost b) {
 		String key = getIconKey(b.getBoostName());
-		String src = UNKNOWN_ICON;
 		if (getIconData().getProperty(key) != null) {
-			src = getIconData().getProperty(key);
+			String src =  getIconProperty(key);
+			String hoverText = capitalizer(b.getBoostName()) + (b.getLevel() != null ? " LVL "+b.getLevel() : "");
+			return String.format(IMG_TAG, src, hoverText);
 		} else {
 			return getCompositeIcon(b);
 		}
-		String hoverText = capitalizer(b.getBoostName()) + (b.getLevel() != null ? " LVL "+b.getLevel() : "");
-		return String.format(IMG_TAG, src, hoverText);
 	}
 	private String getCompositeIcon(final Boost b) {
 		List<String> valid = Arrays.asList("magic","natural","technology","science","mutation");
@@ -405,14 +398,15 @@ public class HtmlBuildInfo {
 			if (valid.contains(element[1])) {
 				String basekey = String.format("enhancement.generic_%s", String.join("_", Arrays.copyOfRange(element, 2, element.length)));
 				String ringkey = String.format("enhancement.ring_%s_%s", element[0], element[1]);
-				return String.format(DOUBLE_IMG, getIconData().getProperty(basekey), getIconData().getProperty(ringkey), hoverText);
+				return String.format(DOUBLE_IMG, getIconProperty(basekey), getIconProperty(ringkey), hoverText);
 			} else {
 				String basekey = String.format("enhancement.generic_%s", String.join("_", Arrays.copyOfRange(element, 1, element.length)));
 				String ringkey = String.format("enhancement.ring_%s", element[0]);
-				return String.format(DOUBLE_IMG, getIconData().getProperty(basekey), getIconData().getProperty(ringkey), hoverText);
+				return String.format(DOUBLE_IMG, getIconProperty(basekey), getIconProperty(ringkey), hoverText);
 			}
 		}
 		System.out.println(String.format("ENHANCEMENT NOT FOUND: %s", b.getBoostName()));
+		System.out.println(String.format("RESOURCE: %s", UNKNOWN_ICON));
 		return String.format(IMG_TAG, UNKNOWN_ICON, hoverText);
 		
 	}
@@ -483,6 +477,29 @@ public class HtmlBuildInfo {
 			}
 		}
 		return iconData;
+	}
+	/**
+	 * Used in all cases to retrieve icon path to ensure file is copied to target directory
+	 * @param attrib
+	 * @return icon path as string
+	 */
+	private String getIconProperty(String attrib) {
+		String result = getIconData().getProperty(attrib);
+		if (result == null ) {
+			result = UNKNOWN_ICON;
+		}
+		System.out.println(String.format("RESOURCE: %s", result));
+		return result;
+	}
+	private String getIconProperty(Power p) {
+		String key = String.format("power.%s.%s", p.getPowerSetName().toLowerCase(), p.getPowerName().toLowerCase());
+		String result = getIconData().getProperty(key);
+		if (result == null ) {
+			result = UNKNOWN_ICON;
+			System.out.println(String.format("POWER NOT FOUND: %s - %s", p.getPowerSetName(), p.getPowerName()));
+		}
+		System.out.println(String.format("RESOURCE: %s", result));
+		return result;
 	}
 	private Properties getSubstitutionData() {
 		if (substitutionData == null) {
