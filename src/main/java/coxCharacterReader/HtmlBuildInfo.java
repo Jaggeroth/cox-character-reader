@@ -508,7 +508,8 @@ public class HtmlBuildInfo {
 				return result;
 			}
 		}
-		String word = attrib.replace("_", " ");
+		// some powers seem to have double underscores in their name
+		String word = attrib.replace("__","_").replace("_", " ");
 		if (word.startsWith("class ")) {
 			word = word.substring(6);
 		}
