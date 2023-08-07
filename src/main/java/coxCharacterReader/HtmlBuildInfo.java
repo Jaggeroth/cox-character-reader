@@ -32,14 +32,18 @@ public class HtmlBuildInfo {
 	private static final String UNKNOWN_ICON = "images\\unknown.png";
 	private static final String DOUBLE_IMG = "<div class=\"img-container\"><img class=\"bottom\" src=\"%s\" width=\"32\" height=\"32\"><img class=\"top\" src=\"%s\" title=\"%s\" width=\"32\" height=\"32\"></div>";
 	private static final String CHAR_TITLE = "%s : lvl %s %s %s / %s %s %s";
+	private static final String INCARNATE_TABLE = "<div class=\"incarnate\">"
+			+ "<table style=\"width: 400px;\">"
+			+ "<tr><td>%s</td><td style=\"width: 36px;\">%s</td></tr>"
+			+ "</table></div>\n<p/>\n";
+	private static final String INCARNATE_TEXT = "<b>%s:</b> %s <br/><b>TIER %s</b><br/>";
     //private static final String CHAR_PAGE_URL = "https://www.cityofheroesrebirth.com/public/api/character/raw?q=<character id here>";
 	// Enigma Tick
 	//private static final String CHAR_PAGE_URL = "https://www.cityofheroesrebirth.com/public/api/character/raw?q=BJGfUO9DTCFxoEE7okniNQ%3D%3D";
 	// Maiden America
 	//private static final String CHAR_PAGE_URL = "https://www.cityofheroesrebirth.com/public/api/character/raw?q=BYzK5AI%2B8UUygO4bER12GQ%3D%3D";
 	// Murder Muse
-	//private static final String CHAR_PAGE_URL = "https://www.cityofheroesrebirth.com/public/api/character/raw?q=mQ2Wzt57EOHCQ1H55Eex0w%3D%3D";
-	private static final String CHAR_PAGE_URL ="https://www.cityofheroesrebirth.com/public/api/character/raw?q=MIgSPyNyAlWFmiE%2BQtuvfKOuIa7cHwOiuJl0xhcUcmE%3D";
+	private static final String CHAR_PAGE_URL = "https://www.cityofheroesrebirth.com/public/api/character/raw?q=mQ2Wzt57EOHCQ1H55Eex0w%3D%3D";
     
     public static final int[] BUILD_LEVELS = new int[]{1, 2, 4, 6, 8, 10, 12, 14, 16, 18, 20, 22, 24, 26, 28, 30, 32, 35, 38, 41, 44, 47, 49};
     private Properties iconData;
@@ -84,6 +88,7 @@ public class HtmlBuildInfo {
 		boosts= parseEnhancements(charContent);
 
 		File file = new File(filename);
+		file.getParentFile().mkdirs();
 		BufferedWriter writer = new BufferedWriter(new FileWriter(file,true));
 		
 		writer.write(getHeaderHtml(char_page_title));
@@ -142,27 +147,62 @@ public class HtmlBuildInfo {
 				}
 			}
 			if (hasIncarnate) {
-				writer.write("<h3>INCARNATE POWERS</h3>");
+				writer.write("<h3>INCARNATE POWERS</h3>\n");
 				if (alphaSlot != null) {
-					writer.write(String.format("ALPHA SLOT: %s TIER %s<br/>", alphaSlot.getPowerName(), alphaSlot.getIncarnateTier()));
+					String iText = String.format(INCARNATE_TEXT,
+							alphaSlot.getPowerSetName().toUpperCase(),
+							capitalizer(alphaSlot.getPowerName()),
+							alphaSlot.getIncarnateTier());
+					String iIcon = getIncarnateIcon(alphaSlot);
+					writer.write(String.format(INCARNATE_TABLE, iText, iIcon));
 				}
 				if (judgementSlot != null) {
-					writer.write(String.format("JUDGEMENT SLOT: %s TIER %s<br/>", judgementSlot.getPowerName(), judgementSlot.getIncarnateTier()));
+					String iText = String.format(INCARNATE_TEXT,
+							judgementSlot.getPowerSetName().toUpperCase(),
+							capitalizer(judgementSlot.getPowerName()),
+							judgementSlot.getIncarnateTier());
+					String iIcon = getIncarnateIcon(judgementSlot);
+					writer.write(String.format(INCARNATE_TABLE, iText, iIcon));
 				}
 				if (interfaceSlot != null) {
-					writer.write(String.format("INTERFACE SLOT: %s TIER %s<br/>", interfaceSlot.getPowerName(), interfaceSlot.getIncarnateTier()));
+					String iText = String.format(INCARNATE_TEXT,
+							interfaceSlot.getPowerSetName().toUpperCase(),
+							capitalizer(interfaceSlot.getPowerName()),
+							interfaceSlot.getIncarnateTier());
+					String iIcon = getIncarnateIcon(interfaceSlot);
+					writer.write(String.format(INCARNATE_TABLE, iText, iIcon));
 				}
 				if (loreSlot != null) {
-					writer.write(String.format("LORE SLOT: %s TIER %s<br/>", loreSlot.getPowerName(), loreSlot.getIncarnateTier()));
+					String iText = String.format(INCARNATE_TEXT,
+							loreSlot.getPowerSetName().toUpperCase(),
+							capitalizer(loreSlot.getPowerName()),
+							loreSlot.getIncarnateTier());
+					String iIcon = getIncarnateIcon(loreSlot);
+					writer.write(String.format(INCARNATE_TABLE, iText, iIcon));
 				}
 				if (destinySlot != null) {
-					writer.write(String.format("DESTINY SLOT: %s TIER %s<br/>", destinySlot.getPowerName(), destinySlot.getIncarnateTier()));
+					String iText = String.format(INCARNATE_TEXT,
+							destinySlot.getPowerSetName().toUpperCase(),
+							capitalizer(destinySlot.getPowerName()),
+							destinySlot.getIncarnateTier());
+					String iIcon = getIncarnateIcon(destinySlot);
+					writer.write(String.format(INCARNATE_TABLE, iText, iIcon));
 				}
 				if (hybridSlot != null) {
-					writer.write(String.format("HYBRID SLOT: %s TIER %s<br/>", hybridSlot.getPowerName(), hybridSlot.getIncarnateTier()));
+					String iText = String.format(INCARNATE_TEXT,
+							hybridSlot.getPowerSetName().toUpperCase(),
+							capitalizer(hybridSlot.getPowerName()),
+							hybridSlot.getIncarnateTier());
+					String iIcon = getIncarnateIcon(hybridSlot);
+					writer.write(String.format(INCARNATE_TABLE, iText, iIcon));
 				}
 				if (genesisSlot != null) {
-					writer.write(String.format("GENESIS SLOT: %s TIER %s<br/>", genesisSlot.getPowerName(), genesisSlot.getIncarnateTier()));
+					String iText = String.format(INCARNATE_TEXT,
+							genesisSlot.getPowerSetName().toUpperCase(),
+							capitalizer(genesisSlot.getPowerName()),
+							genesisSlot.getIncarnateTier());
+					String iIcon = getIncarnateIcon(genesisSlot);
+					writer.write(String.format(INCARNATE_TABLE, iText, iIcon));
 				}
 			}
 		}
@@ -240,7 +280,7 @@ public class HtmlBuildInfo {
 							String.format("(%s) ", String.valueOf(forLevel))+outputPower(p));
 					result = result + "<tr>\n";
 					result = result + findBoostForPower(p, boosts);
-					result = result + "</tr>\n<table>\n";
+					result = result + "</tr>\n</table>\n";
 				}
 			}
 		}
@@ -364,6 +404,12 @@ public class HtmlBuildInfo {
 		}
 		return null;
 	}
+	/*
+	private String getIncarnateIcon(final Power incarnate) {
+		String key = String.format("enhancement.%s", incarnate.getPowerName().toLowerCase());
+		String src = getIconProperty(key);
+		return String.format(IMG_TAG, src, incarnate.getPowerName());
+	}*/
 	private String getAlignmentIcon(final String a) {
 		String key = String.format("alignment.%s", a.toLowerCase());
 		String src = getIconProperty(key);
@@ -382,6 +428,14 @@ public class HtmlBuildInfo {
 	private String getPowerIcon(final Power p) {
 		String src = getIconProperty(p);
 		return String.format(IMG_TAG, src, capitalizer(p));
+	}
+	private String getIncarnateIcon(final Power incarnate) {
+		String key = String.format("power.%s.%s.%s",
+				incarnate.getPowerSetName().toLowerCase(),
+				incarnate.getPowerName().split("_")[0].toLowerCase(),
+				incarnate.getIncarnateTier());
+		String src = getIconProperty(key);
+		return String.format(IMG_TAG, src, capitalizer(incarnate));
 	}
 	private String getBoostIcon(final Boost b) {
 		String key = getIconKey(b.getBoostName());
@@ -492,6 +546,7 @@ public class HtmlBuildInfo {
 		String result = getIconData().getProperty(attrib);
 		if (result == null ) {
 			result = UNKNOWN_ICON;
+			System.out.println(String.format("ICON NOT FOUND: %s", attrib));
 		}
 		resourceAdd(result);
 		return result;
@@ -525,8 +580,8 @@ public class HtmlBuildInfo {
 				+ "<head>\n"
 				+ "<link rel=\"stylesheet\" href=\"css\\build.css\" type=\"text/css\" />\n"
 				+ "<title>" + title + "</title>\n"
-				+ "</head>"
-				+ "<body>";	
+				+ "</head>\n"
+				+ "<body>\n";	
 	}
 	private static String getFooterHtml() {
 		return "</div>\n"
