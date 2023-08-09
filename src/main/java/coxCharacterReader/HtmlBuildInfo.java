@@ -554,7 +554,7 @@ public class HtmlBuildInfo {
 		return result;
 	}
 	private String getIconProperty(Power p) {
-		String key = String.format("power.%s.%s", p.getPowerSetName().toLowerCase(), p.getPowerName().toLowerCase());
+		String key = String.format("power.%s.%s", p.getPowerSetName().toLowerCase(), p.getPowerName().toLowerCase().replace(":", ""));
 		String result = getIconData().getProperty(key);
 		if (result == null ) {
 			result = UNKNOWN_ICON;
