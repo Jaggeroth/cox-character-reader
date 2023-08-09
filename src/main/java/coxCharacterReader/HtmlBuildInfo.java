@@ -44,8 +44,9 @@ public class HtmlBuildInfo {
 	//private static final String CHAR_PAGE_URL = "https://www.cityofheroesrebirth.com/public/api/character/raw?q=BYzK5AI%2B8UUygO4bER12GQ%3D%3D";
 	// Murder Muse
 	private static final String CHAR_PAGE_URL = "https://www.cityofheroesrebirth.com/public/api/character/raw?q=mQ2Wzt57EOHCQ1H55Eex0w%3D%3D";
-    
-    public static final int[] BUILD_LEVELS = new int[]{1, 2, 4, 6, 8, 10, 12, 14, 16, 18, 20, 22, 24, 26, 28, 30, 32, 35, 38, 41, 44, 47, 49};
+	// Strife Spirit
+	//private static final String CHAR_PAGE_URL = "https://www.cityofheroesrebirth.com/public/api/character/raw?q=RCrFx1%2FEVvwwftixCr75Vg%3D%3D";
+
     private Properties iconData;
     private Properties substitutionData;
     private List<String> resources;
@@ -53,7 +54,7 @@ public class HtmlBuildInfo {
 	public static void main(String[] args) throws IOException {
     	System.out.println("START");
     	HtmlBuildInfo hbi = new HtmlBuildInfo();
-    	hbi.extractExecute("C:\\Data\\Docs\\hero-id\\characters", "test_char", CHAR_PAGE_URL);
+    	hbi.extractExecute("C:\\Data\\Docs\\hero-id\\test", "test_char", CHAR_PAGE_URL);
     	System.out.println("END");
 	}
 
@@ -106,7 +107,7 @@ public class HtmlBuildInfo {
 		writer.write("<div class=\"layout\">\n<h3>INHERENT POWERS</h3>");
 		writer.write(findInherentPowers(powers, boosts));
 		writer.write("<h3>POWERS</h3>");
-		for (int buildLevel : BUILD_LEVELS) {
+		for (int buildLevel = 1; buildLevel < 50; buildLevel++) {
 			if (buildLevel <= characterLevel) {
 				writer.write(findPower(buildLevel,powers, boosts));
 			}
