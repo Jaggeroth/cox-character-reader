@@ -43,9 +43,13 @@ public class HtmlBuildInfo {
 	// Maiden America
 	//private static final String CHAR_PAGE_URL = "https://www.cityofheroesrebirth.com/public/api/character/raw?q=BYzK5AI%2B8UUygO4bER12GQ%3D%3D";
 	// Murder Muse
-	private static final String CHAR_PAGE_URL = "https://www.cityofheroesrebirth.com/public/api/character/raw?q=mQ2Wzt57EOHCQ1H55Eex0w%3D%3D";
+	//private static final String CHAR_PAGE_URL = "https://www.cityofheroesrebirth.com/public/api/character/raw?q=mQ2Wzt57EOHCQ1H55Eex0w%3D%3D";
 	// Strife Spirit
 	//private static final String CHAR_PAGE_URL = "https://www.cityofheroesrebirth.com/public/api/character/raw?q=RCrFx1%2FEVvwwftixCr75Vg%3D%3D";
+	// Power Jenny
+	//private static final String CHAR_PAGE_URL = "https://www.cityofheroesrebirth.com/public/api/character/raw?q=brGxzOVXny%2Fg7%2FnbZnQtig%3D%3D";
+	//child of babylon
+	private static final String CHAR_PAGE_URL = "https://www.cityofheroesrebirth.com/public/api/character/raw?q=Mx6njIKk33%2Fe7KfLl80JA6Za3m%2BexoPF2%2Bt%2BAxTxPVk%3D";
 
     private Properties iconData;
     private Properties substitutionData;
@@ -54,7 +58,7 @@ public class HtmlBuildInfo {
 	public static void main(String[] args) throws IOException {
     	System.out.println("START");
     	HtmlBuildInfo hbi = new HtmlBuildInfo();
-    	hbi.extractExecute("C:\\Data\\Docs\\hero-id\\test", "test_char", CHAR_PAGE_URL);
+    	hbi.extractExecute("C:\\Data\\Docs\\hero-id\\seans", "test_char", CHAR_PAGE_URL);
     	System.out.println("END");
 	}
 
@@ -419,12 +423,12 @@ public class HtmlBuildInfo {
 	private String getArchitypeIcon(final String a) {
 		String key = String.format("archetype.%s", a.toLowerCase());
 		String src = getIconProperty(key);
-		return String.format(IMG_TAG, src, a);
+		return String.format(IMG_TAG, src, capitalizer(a));
 	}
 	private String getOriginIcon(final String origin) {
 		String key = String.format("origin.%s", origin.toLowerCase());
 		String src = getIconProperty(key);
-		return String.format(IMG_TAG, src, origin);
+		return String.format(IMG_TAG, src, capitalizer(origin));
 	}
 	private String getPowerIcon(final Power p) {
 		String src = getIconProperty(p);
@@ -619,6 +623,7 @@ public class HtmlBuildInfo {
 		    		FileUtils.copyFile(sourceFile, targetFile);
 		    	} catch (IOException e) {
 		    		// TODO Auto-generated catch block
+		    		System.out.println(String.format("Failure copying %s to %s", sourceFile, targetFile));
 		    		e.printStackTrace();
 		    	}
 		    }

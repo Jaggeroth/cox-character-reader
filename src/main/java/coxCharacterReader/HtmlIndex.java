@@ -115,7 +115,6 @@ public class HtmlIndex {
 			}
 		}
 		System.out.println("INDEX");
-		//File file = new File(String.format(CHAR_DIR, "index"));
 		File file = new File(String.format("%s/index.html", p.getProperty("character_dir")));
 		BufferedWriter writer = new BufferedWriter(new FileWriter(file,true));
 		writer.write(getHeaderHtml());
