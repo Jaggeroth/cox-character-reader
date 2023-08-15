@@ -558,7 +558,7 @@ public class HtmlBuildInfo {
 		return result;
 	}
 	private String getIconProperty(Power p) {
-		String key = String.format("power.%s.%s", p.getPowerSetName().toLowerCase(), p.getPowerName().toLowerCase().replace(":", ""));
+		String key = String.format("power.%s.%s", p.getPowerSetName().toLowerCase(), p.getPowerName().toLowerCase().replace("__","_").replace(":", ""));
 		String result = getIconData().getProperty(key);
 		if (result == null ) {
 			result = UNKNOWN_ICON;
@@ -613,19 +613,19 @@ public class HtmlBuildInfo {
 	}
 	private void deployResources(List<String> resources, String targetDir) {
 		for (String resource : resources) {
-			String toFilePath = String.format("%s\\%s", targetDir, resource);
-			URL url = getClass().getResource(String.format("/%s", resource.replace("\\", "/")));
-		    File sourceFile = new File(url.getPath());
-		    File targetFile = new File(toFilePath);
-		    if (!targetFile.exists()) {
-		    	targetFile.getParentFile().mkdirs();
-		    	try {
-		    		FileUtils.copyFile(sourceFile, targetFile);
-		    	} catch (IOException e) {
-		    		// TODO Auto-generated catch block
-		    		System.out.println(String.format("Failure copying %s to %s", sourceFile, targetFile));
-		    		e.printStackTrace();
-		    	}
+	    	try {
+	    		String toFilePath = String.format("%s\\%s", targetDir, resource);
+	    		URL url = getClass().getResource(String.format("/%s", resource.replace("\\", "/")));
+	    		File sourceFile = new File(url.getPath());
+	    		File targetFile = new File(toFilePath);
+	    		if (!targetFile.exists()) {
+	    			targetFile.getParentFile().mkdirs();
+	    			FileUtils.copyFile(sourceFile, targetFile);
+	    		}
+	    	} catch (Exception e) {
+	    		// TODO Auto-generated catch block
+	    		System.out.println(String.format("Failure copying %s ", resource));
+	    		e.printStackTrace();
 		    }
 		}
 	}
