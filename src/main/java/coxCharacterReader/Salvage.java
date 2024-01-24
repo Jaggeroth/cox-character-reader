@@ -110,7 +110,7 @@ public class Salvage {
 		Collections.sort(characters);
 		File file = new File(p.getProperty("filename"));
 		BufferedWriter writer = new BufferedWriter(new FileWriter(file,true));
-		writer.write("Character,Archetype,Level,Origin,\"Primary Powerset\",\"Secondary Powerset\"," + String.join(",", salvageTypes)+"\n");
+		writer.write("Character,Archetype,Level,Origin,\"Primary Powerset\",\"Secondary Powerset\",Influence," + String.join(",", salvageTypes)+"\n");
 		for (String c : characters) {
 			Map<String, String> attribs = attribsMatrix.get(c);
 			String archetype = attribs.get("Archetype") != null ? attribs.get("Archetype").toString() : "Unknown";
@@ -118,7 +118,8 @@ public class Salvage {
 			String o = attribs.get("Origin") != null ? attribs.get("Origin").toString() : "Unknown";
 			String prime = attribs.get("Primary") != null ? attribs.get("Primary").toString() : "Unknown";
 			String sec = attribs.get("Secondary") != null ? attribs.get("Secondary").toString() : "Unknown";
-			writer.write(String.format("\"%s\",%s,%s,%s,%s,%s", c, archetype, lvl, o, prime, sec));
+			String inf = attribs.get("Influence") != null ? attribs.get("Influence").toString() : "0";
+			writer.write(String.format("\"%s\",%s,%s,%s,%s,%s,%s", c, archetype, lvl, o, prime, sec, inf));
 			//
 			Map<String, String> salvage = salvageMatrix.get(c);
 			for (String s : salvageTypes) {
@@ -248,6 +249,9 @@ public class Salvage {
 			  attribs.put("Primary", line.split(" ")[1]);
 		  } else if (line.startsWith("Ents2[0].originalSecondary ")) {
 			  attribs.put("Secondary", line.split(" ")[1]);
+		  } else if (line.startsWith("InfluencePoints ")) {
+			  int inf = Integer.valueOf(line.split(" ")[1]) + 1;
+			  attribs.put("Influence", String.valueOf(inf));
 		  }
 		}
 		scanner.close();

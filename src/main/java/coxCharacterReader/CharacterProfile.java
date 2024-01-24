@@ -10,7 +10,8 @@ public class CharacterProfile {
 	private String secondary;
 	private String filename;
 	private String title;
-	public CharacterProfile(String name, String architype, String alignment, String level, String origin, String primary, String secondary, String filename, String title) {
+	private String influence;
+	public CharacterProfile(String name, String architype, String alignment, String level, String origin, String primary, String secondary, String filename, String title, String influence) {
 		this.name = name;
 		this.architype = architype;
 		this.alignment = alignment;
@@ -20,8 +21,9 @@ public class CharacterProfile {
 		this.secondary = secondary;
 		this.filename = filename;
 		this.title = title;
+		this.influence = influence;
 	}
-	public CharacterProfile(String name, String architype, String alignment, int level, String origin, String primary, String secondary, String filename, String title) {
+	public CharacterProfile(String name, String architype, String alignment, int level, String origin, String primary, String secondary, String filename, String title, String influence) {
 		this.name = name;
 		this.architype = architype;
 		this.alignment = alignment;
@@ -31,6 +33,7 @@ public class CharacterProfile {
 		this.secondary = secondary;
 		this.filename = filename;
 		this.title = title;
+		this.influence = influence;
 	}
 	public String getName() {
 		return name;
@@ -85,5 +88,11 @@ public class CharacterProfile {
 	}
 	public void setTitle(String title) {
 		this.title = title;
+	}
+	public String getInfluence() {
+		return influence;
+	}
+	public void setInfluence(String influence) {
+		this.influence = influence;
 	}
 }
